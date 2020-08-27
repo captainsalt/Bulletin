@@ -4,8 +4,8 @@ module.exports = {
     node: true
   },
   extends: [
-    'plugin:vue/essential',
-    '@vue/standard',
+    "holo",
+    "holo/vue",
     '@vue/typescript/recommended'
   ],
   parserOptions: {
