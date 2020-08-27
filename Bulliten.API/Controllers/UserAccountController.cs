@@ -37,7 +37,7 @@ namespace Bulliten.API.Controllers
             var isInvalidUsername = _accounts.Any(u => u.Username == formAccount.Username);
 
             if (isInvalidUsername) 
-                return Problem("Username already in use", statusCode: 400);
+                return BadRequest("Username already in use");
 
             _accounts.Add(formAccount);
             return StatusCode(201);
