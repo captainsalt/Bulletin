@@ -1,13 +1,18 @@
 <template>
-  <div class="home">
-    <div>Welcome to Bulliten</div>
-  </div>
+  <v-container fill-height>
+
+  </v-container>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
 export default Vue.extend({
-  name: "Home"
+  data: () => ({
+
+  })
 });
 </script>
+
+<style>
+</style>
