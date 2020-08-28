@@ -3,16 +3,19 @@
     <v-alert v-if="error" type="error">
       An error has occured
     </v-alert>
+
     <v-text-field
       v-model="username"
       label="Username"
-      required />
+      required
+    />
 
     <v-text-field
       v-model="password"
       type="password"
       label="Password"
-      required />
+      required
+    />
 
     <v-btn @click="submit">
       Submit

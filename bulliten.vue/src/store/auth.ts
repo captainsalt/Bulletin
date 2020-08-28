@@ -10,4 +10,4 @@ export default {
       state.token = payload;
     }
   }
-}
+};
