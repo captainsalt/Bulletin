@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bulliten.API.Models
 {
-    public struct AuthenticationResponse
+    public class AuthenticationResponse
     {
         public int ID { get; set; }
 

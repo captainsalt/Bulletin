@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bulliten.API.Models
 {
-    public struct AuthenticationRequest
+    public class AuthenticationRequest
     {
         [Required]
         public string Username { get; set; }
