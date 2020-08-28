@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bulliten.API.Services;
+using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -25,8 +27,10 @@ namespace Bulliten.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddControllers();
             services.AddDbContext<BullitenDBContext>(ServiceLifetime.Singleton);
+            services.AddScoped<IUserAccountService, UserAccountService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,6 +44,14 @@ namespace Bulliten.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(app =>
+                app.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+            );
+
+            app.UseMiddleware<JwtMiddleware>();
 
             app.UseAuthorization();
 
