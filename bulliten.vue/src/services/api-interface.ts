@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const baseUrl: string = process.env.VUE_APP_API_URL;
 
 export function createAccount(username: string, password: string): Promise<Response> {
