@@ -2,7 +2,7 @@ import axios from "axios";
 
 const baseUrl: string = process.env.VUE_APP_API_URL;
 
-export async function createAccount(username: string, password: string): Promise<string> {
+export async function createAccount(username: string, password: string): Promise<Response> {
   const form = new FormData();
   form.append("username", username);
   form.append("password", password);
@@ -13,8 +13,5 @@ export async function createAccount(username: string, password: string): Promise
     body: form
   });
 
-  if (response.ok)
-    return response.text();
-
-  throw Error("Error creating account");
+  return response;
 }
