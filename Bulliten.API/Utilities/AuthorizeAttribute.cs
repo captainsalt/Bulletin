@@ -17,7 +17,7 @@ namespace Bulliten.API.Utilities
             var user = (UserAccount)context.HttpContext.Items["User"];
             if (user == null)
             {
-                context.Result = new JsonResult("Unauthorized")
+                context.Result = new JsonResult(new Error("Unauthorized", 401))
                 {
                     StatusCode = StatusCodes.Status401Unauthorized
                 };

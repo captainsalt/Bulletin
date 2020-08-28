@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Bulliten.API.Models;
 using Bulliten.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -38,7 +39,7 @@ namespace Bulliten.API.Controllers
             var isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
 
             if (isInvalidUsername)
-                return BadRequest("Username already in use");
+                return BadRequest(new Error($"Username {formAccount.Username} is already in use", 400));
 
             await _context.UserAccounts.AddAsync(formAccount);
             await _context.SaveChangesAsync();
