@@ -1,7 +1,7 @@
 <template>
   <v-form>
-    <v-alert v-if="error" type="error">
-      An error has occured
+    <v-alert v-if="errorMsg" type="error">
+      {{ errorMsg }}
     </v-alert>
 
     <v-text-field
@@ -33,7 +33,7 @@ export default Vue.extend({
   data: () => ({
     username: "",
     password: "",
-    error: false
+    errorMsg: ""
   }),
   methods: {
     ...mapMutations("auth", [
@@ -43,7 +43,8 @@ export default Vue.extend({
       const response = await api.createAccount(this.username, this.password);
 
       if (!response.ok) {
-        this.error = true;
+        const err = await response.json();
+        this.errorMsg = err.message;
         return;
       }
 
