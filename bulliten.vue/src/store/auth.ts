@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import { SET_TOKEN } from "./mutations";
 
 export default {
