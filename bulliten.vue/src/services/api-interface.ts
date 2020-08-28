@@ -7,7 +7,7 @@ export async function createAccount(username: string, password: string): Promise
   form.append("username", username);
   form.append("password", password);
 
-  const response = await fetch(baseUrl + "/create", {
+  const response = await fetch(`${baseUrl}/api/user/create`, {
     method: "POST",
     mode: "cors",
     body: form
