@@ -30,7 +30,7 @@ namespace Bulliten.API
             services.AddCors();
             services.AddControllers();
             services.AddDbContext<BullitenDBContext>(ServiceLifetime.Singleton);
-            services.AddScoped<IUserAccountService, UserAccountService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

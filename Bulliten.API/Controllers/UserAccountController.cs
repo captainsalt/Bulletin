@@ -18,13 +18,13 @@ namespace Bulliten.API.Controllers
     {
         private readonly ILogger<UserAccountController> _logger;
         private readonly BullitenDBContext _context;
-        private readonly IUserAccountService _accountService;
+        private readonly IAuthenticationService _authService;
 
-        public UserAccountController(ILogger<UserAccountController> logger, BullitenDBContext context, IUserAccountService accountService)
+        public UserAccountController(ILogger<UserAccountController> logger, BullitenDBContext context, IAuthenticationService accountService)
         {
             _logger = logger;
             _context = context;
-            _accountService = accountService;
+            _authService = accountService;
         }
 
         [HttpGet("all")]
@@ -44,7 +44,7 @@ namespace Bulliten.API.Controllers
             await _context.UserAccounts.AddAsync(formAccount);
             await _context.SaveChangesAsync();
 
-            var response = await _accountService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
+            var response = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
 
             return StatusCode(201, response.Token);
         }

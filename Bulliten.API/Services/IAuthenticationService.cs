@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bulliten.API.Services
 {
-    public interface IUserAccountService
+    public interface IAuthenticationService
     {
         Task<AuthenticationResponse> Authenticate(AuthenticationRequest model);
     }

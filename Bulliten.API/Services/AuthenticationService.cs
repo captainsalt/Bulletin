@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 
 namespace Bulliten.API.Services
 {
-    public class UserAccountService : IUserAccountService
+    public class AuthenticationService : IAuthenticationService
     {
         private readonly IConfiguration _config;
         private readonly BullitenDBContext _context;
 
-        public UserAccountService(IConfiguration config, BullitenDBContext context)
+        public AuthenticationService(IConfiguration config, BullitenDBContext context)
         {
             _config = config;
             _context = context;
