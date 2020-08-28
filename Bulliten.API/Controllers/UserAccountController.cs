@@ -4,7 +4,9 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Bulliten.API.Models;
+using Bulliten.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Bulliten.API.Controllers
@@ -14,33 +16,36 @@ namespace Bulliten.API.Controllers
     public class UserAccountController : ControllerBase
     {
         private readonly ILogger<UserAccountController> _logger;
+        private readonly BullitenDBContext _context;
+        private readonly IUserAccountService _accountService;
 
-        private static List<UserAccount> _accounts = new List<UserAccount>
-        {
-            new UserAccount { Username = "test", Password = "test" }
-        };
-
-        public UserAccountController(ILogger<UserAccountController> logger)
+        public UserAccountController(ILogger<UserAccountController> logger, BullitenDBContext context, IUserAccountService accountService)
         {
             _logger = logger;
+            _context = context;
+            _accountService = accountService;
         }
 
         [HttpGet("all")]
-        public IEnumerable<UserAccount> GetUsers()
+        public async Task<IEnumerable<UserAccount>> GetUsers()
         {
-            return _accounts;
+            return await _context.UserAccounts.ToListAsync();
         }
 
         [HttpPost("create")]
-        public IActionResult CreateAccount([FromForm]UserAccount formAccount)
+        public async Task<IActionResult> CreateAccount([FromForm] UserAccount formAccount)
         {
-            var isInvalidUsername = _accounts.Any(u => u.Username == formAccount.Username);
+            var isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
 
-            if (isInvalidUsername) 
+            if (isInvalidUsername)
                 return BadRequest("Username already in use");
 
-            _accounts.Add(formAccount);
-            return StatusCode(201);
+            await _context.UserAccounts.AddAsync(formAccount);
+            await _context.SaveChangesAsync();
+
+            var response = await _accountService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
+
+            return StatusCode(201, response.Token);
         }
     }
 }
