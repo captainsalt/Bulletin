@@ -25,17 +25,17 @@ namespace Bulliten.API.Utilities
             _context = context;
         }
 
-        public async Task Invoke(HttpContext context, IAuthenticationService authService)
+        public async Task Invoke(HttpContext context)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                await AttachUserToContext(context, authService, token);
+                await AttachUserToContext(context, token);
 
             await _next(context);
         }
 
-        private async Task AttachUserToContext(HttpContext context, IAuthenticationService authService, string token)
+        private async Task AttachUserToContext(HttpContext context, string token)
         {
             try
             {
