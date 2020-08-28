@@ -44,9 +44,21 @@ namespace Bulliten.API.Controllers
             await _context.UserAccounts.AddAsync(formAccount);
             await _context.SaveChangesAsync();
 
-            var response = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
+            var auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
 
-            return StatusCode(201, response.Token);
+            return StatusCode(201, auth.Token);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromForm] UserAccount formAccount)
+        {
+            var matchedAccount = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
+
+            if (matchedAccount == null)
+                return BadRequest(new Error("Invalid username or password", 400));
+
+            var auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
+            return Ok(new { token = auth.Token });
         }
     }
 }
