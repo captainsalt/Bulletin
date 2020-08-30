@@ -46,7 +46,7 @@ namespace Bulliten.API.Controllers
 
             var auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
 
-            return StatusCode(201, auth.Token);
+            return StatusCode(201, new { token = auth.Token });
         }
 
         [HttpPost("login")]

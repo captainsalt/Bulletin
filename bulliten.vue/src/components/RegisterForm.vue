@@ -43,12 +43,12 @@ export default Vue.extend({
       const response = await api.createAccount(this.username, this.password);
 
       if (!response.ok) {
-        const err = await response.json();
-        this.errorMsg = err.message;
+        this.errorMsg = (await response.json()).message;
         return;
       }
 
-      this.SET_TOKEN(await response.text());
+      const token = (await response.json()).token;
+      this.SET_TOKEN(token);
     }
   }
 });
