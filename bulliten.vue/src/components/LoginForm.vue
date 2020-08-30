@@ -7,15 +7,13 @@
     <v-text-field
       v-model="username"
       label="Username"
-      required
-    />
+      required />
 
     <v-text-field
       v-model="password"
       type="password"
       label="Password"
-      required
-    />
+      required />
 
     <v-btn @click="submit">
       Login
@@ -42,8 +40,10 @@ export default Vue.extend({
     async submit() {
       const response = await api.login(this.username, this.password);
 
-      if (!response.ok)
+      if (!response.ok) {
         this.errorMsg = (await response.json()).message;
+        return;
+      }
 
       const token = (await response.json()).token;
       this.SET_TOKEN(token);
