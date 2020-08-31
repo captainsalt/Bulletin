@@ -26,8 +26,8 @@
 <script>
 import Vue from "vue";
 import * as api from "@/services/api-interface";
-import * as mutations from "@/store/mutations";
 import { mapMutations } from "vuex";
+import { SET_TOKEN } from "@/store/mutations";
 
 export default Vue.extend({
   data: () => ({
@@ -37,7 +37,7 @@ export default Vue.extend({
   }),
   methods: {
     ...mapMutations("auth", [
-      mutations.SET_TOKEN
+      SET_TOKEN
     ]),
     async submit() {
       const response = await api.createAccount(this.username, this.password);
