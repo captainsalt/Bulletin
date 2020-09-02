@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Dashboard from "../views/Dashboard.vue";
+import auth from "@/store/auth";
 
 Vue.use(VueRouter);
 
@@ -32,7 +33,13 @@ const routes: Array<RouteConfig> = [
   {
     path: "/dashboard",
     name: "Dashboard",
-    component: Dashboard
+    component: Dashboard,
+    beforeEnter: (to, from, next) => {
+      if (auth.state.token)
+        next();
+      else
+        next("/login");
+    }
   }
 ];
 
