@@ -49,6 +49,7 @@ export default Vue.extend({
 
       const token = (await response.json()).token;
       this.SET_TOKEN(token);
+      await this.$router.push("/dashboard");
     }
   }
 });
