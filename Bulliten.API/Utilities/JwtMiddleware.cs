@@ -15,6 +15,11 @@ namespace Bulliten.API.Utilities
 {
     public class JwtMiddleware
     {
+        /// <summary>
+        ///  Key to used to retrieve the validated user from <see cref="HttpContext"/>
+        /// </summary>
+        public const string CONTEXT_USER = "CONTEXT_USER";
+
         private readonly RequestDelegate _next;
         private readonly IConfiguration _configuration;
         private readonly BullitenDBContext _context;
@@ -42,6 +47,7 @@ namespace Bulliten.API.Utilities
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_configuration["Secret"]);
+
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -56,7 +62,7 @@ namespace Bulliten.API.Utilities
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
 
                 // attach user to context on successful jwt validation
-                context.Items["User"] = await _context.UserAccounts.FirstOrDefaultAsync(u => u.ID == userId);
+                context.Items[CONTEXT_USER] = await _context.UserAccounts.FirstOrDefaultAsync(u => u.ID == userId);
             }
             catch
             {

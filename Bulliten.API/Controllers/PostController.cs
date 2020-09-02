@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bulliten.API.Models;
 using Bulliten.API.Utilities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -18,7 +20,6 @@ namespace Bulliten.API.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            Console.WriteLine(HttpContext.User);
             return new string[] { "value1", "value2" };
         }
 
@@ -46,5 +47,9 @@ namespace Bulliten.API.Controllers
         public void Delete(int id)
         {
         }
+
+        private UserAccount GetAccountFromContext(HttpContext context) =>
+            (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+
     }
 }
