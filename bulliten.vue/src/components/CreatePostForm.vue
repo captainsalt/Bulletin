@@ -1,5 +1,9 @@
 <template>
   <v-container>
+    <v-alert v-if="errorMsg" type="error">
+      {{ errorMsg }}
+    </v-alert>
+
     <v-textarea v-model="content" solo/>
 
     <v-btn
@@ -18,16 +22,19 @@ import * as api from "@/services/api-interface";
 
 export default Vue.extend({
   data: () => ({
-    content: ""
+    content: "",
+    errorMsg: ""
   }),
   methods: {
     async createPost() {
       const response = await api.createPost(this.content);
 
-      if (response.ok)
-        console.log("response :>> ", response);
-      else
-        console.log("error");
+      if (!response.ok) {
+        this.errorMsg = "Error posting";
+        return;
+      }
+
+      this.errorMsg = "";
     }
   }
 });
