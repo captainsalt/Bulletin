@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-textarea solo/>
+    <v-textarea v-model="content" solo/>
 
     <v-btn
       color="primary"
@@ -14,10 +14,20 @@
 
 <script lang="ts">
 import Vue from "vue";
-export default Vue.extend({
-  methods: {
-    createPost() {
+import * as api from "@/services/api-interface";
 
+export default Vue.extend({
+  data: () => ({
+    content: ""
+  }),
+  methods: {
+    async createPost() {
+      const response = await api.createPost(this.content);
+
+      if (response.ok)
+        console.log("response :>> ", response);
+      else
+        console.log("error");
     }
   }
 });

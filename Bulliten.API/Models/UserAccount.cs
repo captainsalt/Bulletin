@@ -15,6 +15,6 @@ namespace Bulliten.API.Models
         [JsonIgnore]
         public string Password { get; set; }
 
-        public ICollection<Post> Posts { get; set; }
+        public ICollection<Post> Posts { get; set; } = new List<Post>();
     }
 }

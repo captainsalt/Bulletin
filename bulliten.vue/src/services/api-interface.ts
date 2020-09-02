@@ -1,3 +1,5 @@
+import auth from "@/store/auth";
+
 const baseUrl: string = process.env.VUE_APP_API_URL;
 
 export function createAccount(username: string, password: string): Promise<Response> {
@@ -23,3 +25,19 @@ export function login(username: string, password: string): Promise<Response> {
     body: form
   });
 }
+
+export function createPost(content: string): Promise<Response> {
+  const form = new FormData();
+  const headers = new Headers();
+
+  form.append("content", content);
+  headers.append("Authorization", auth.state.token || "");
+
+  return fetch(`${baseUrl}/api/post/create`, {
+    method: "POST",
+    mode: "cors",
+    body: form,
+    headers
+  });
+}
+

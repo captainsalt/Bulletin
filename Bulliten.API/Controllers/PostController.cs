@@ -6,6 +6,7 @@ using Bulliten.API.Models;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,6 +17,13 @@ namespace Bulliten.API.Controllers
     [ApiController]
     public class PostController : ControllerBase
     {
+        private readonly BullitenDBContext _context;
+
+        public PostController(BullitenDBContext context)
+        {
+            _context = context;
+        }
+
         // GET: api/<PostController>
         [HttpGet]
         public IEnumerable<string> Get()
@@ -31,9 +39,19 @@ namespace Bulliten.API.Controllers
         }
 
         // POST api/<PostController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("create")]
+        public async Task CreatePost([FromForm] Post formPost)
         {
+            var user = GetAccountFromContext();
+            var dbUser = await _context.UserAccounts.FirstAsync(u => u.ID == user.ID);
+
+            formPost.Author = user;
+            formPost.CreationDate = DateTime.Now;
+
+            dbUser.Posts.Add(formPost);
+            await _context.SaveChangesAsync();
+
+            Ok();
         }
 
         // PUT api/<PostController>/5
@@ -48,7 +66,7 @@ namespace Bulliten.API.Controllers
         {
         }
 
-        private UserAccount GetAccountFromContext(HttpContext context) =>
+        private UserAccount GetAccountFromContext() =>
             (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 
     }
