@@ -3,7 +3,7 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-Bulliten.db
+Bulliten.db*
 
 # User-specific files
 *.rsuser
