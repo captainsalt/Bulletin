@@ -4,7 +4,13 @@
       {{ errorMsg }}
     </v-alert>
 
-    <v-textarea v-model="content" solo/>
+    <v-textarea
+      v-model="content"
+      solo
+      auto-grow
+      rows="1"
+      clearable
+    />
 
     <v-btn
       color="primary"
