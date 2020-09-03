@@ -1,10 +1,10 @@
-/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SET_TOKEN } from "./mutations";
 
 export default {
   namespaced: true,
   state: {
-    token: localStorage.getItem("token")
+    token: ""
   },
   mutations: {
     [SET_TOKEN](state: any, payload: string) {

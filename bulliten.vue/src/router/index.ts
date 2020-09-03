@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Dashboard from "../views/Dashboard.vue";
-import auth from "@/store/auth";
+import store from "@/store/index";
 
 Vue.use(VueRouter);
 
@@ -35,7 +35,10 @@ const routes: Array<RouteConfig> = [
     name: "Dashboard",
     component: Dashboard,
     beforeEnter: (to, from, next) => {
-      if (auth.state.token)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const token = (store.state as any).auth.token;
+
+      if (token)
         next();
       else
         next("/login");

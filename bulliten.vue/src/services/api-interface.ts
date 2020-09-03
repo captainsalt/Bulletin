@@ -1,6 +1,11 @@
-import auth from "@/store/auth";
+import store from "@/store/index";
 
 const baseUrl: string = process.env.VUE_APP_API_URL;
+
+function getAuthToken(): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (store.state as any).auth.token;
+}
 
 export function createAccount(username: string, password: string): Promise<Response> {
   const form = new FormData();
@@ -31,7 +36,7 @@ export function createPost(content: string): Promise<Response> {
   const headers = new Headers();
 
   form.append("content", content);
-  headers.append("Authorization", auth.state.token || "");
+  headers.append("Authorization", getAuthToken() || "");
 
   return fetch(`${baseUrl}/api/post/create`, {
     method: "POST",
@@ -43,7 +48,7 @@ export function createPost(content: string): Promise<Response> {
 
 export async function getPosts(): Promise<Post[]> {
   const headers = new Headers();
-  headers.append("Authorization", auth.state.token || "");
+  headers.append("Authorization", getAuthToken() || "");
 
   const response = await fetch(`${baseUrl}/api/post`, {
     method: "GET",
@@ -56,4 +61,3 @@ export async function getPosts(): Promise<Post[]> {
 
   return (await response.json()).posts;
 }
-
