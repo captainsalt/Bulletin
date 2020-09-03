@@ -1,26 +1,32 @@
 <template>
-  <v-form>
-    <v-alert v-if="errorMsg" type="error">
-      {{ errorMsg }}
-    </v-alert>
+  <v-card class="card" outlined>
+    <v-form>
+      <v-alert v-if="errorMsg" type="error">
+        {{ errorMsg }}
+      </v-alert>
 
-    <v-text-field
-      v-model="username"
-      label="Username"
-      required
-    />
+      <v-text-field
+        v-model="username"
+        label="Username"
+        required
+      />
 
-    <v-text-field
-      v-model="password"
-      type="password"
-      label="Password"
-      required
-    />
+      <v-text-field
+        v-model="password"
+        type="password"
+        label="Password"
+        required
+      />
 
-    <v-btn @click="submit">
-      Login
-    </v-btn>
-  </v-form>
+      <v-btn
+        block
+        color="primary"
+        @click="submit"
+      >
+        Login
+      </v-btn>
+    </v-form>
+  </v-card>
 </template>
 
 <script lang="ts">
@@ -54,3 +60,10 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style scoped>
+.card {
+  width: 50% ;
+  padding: 10px;
+}
+</style>
