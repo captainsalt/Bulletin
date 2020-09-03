@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <BullitenBoard/>
-    <CreatePostForm/>
-  </div>
+  <v-container fill-height>
+    <BullitenBoard class="bulliten"/>
+    <CreatePostForm class="create"/>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -19,5 +19,12 @@ export default Vue.extend({
 </script>
 
 <style>
+.bulliten {
+  height: 100%;
+}
 
+.create {
+  position: absolute;
+  bottom: 0;
+}
 </style>

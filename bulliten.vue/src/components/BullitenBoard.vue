@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <v-container>
     <PostElement
       v-for="p in posts"
       :key="p.id"
       :post="p"
     />
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
