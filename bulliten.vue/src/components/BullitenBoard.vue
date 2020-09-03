@@ -21,7 +21,7 @@ export default Vue.extend({
     posts: [] as Array<Post>
   }),
   async beforeMount() {
-    this.posts = (await getPosts());
+    this.posts = await getPosts();
   }
 });
 </script>
