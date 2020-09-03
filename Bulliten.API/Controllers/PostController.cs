@@ -26,9 +26,12 @@ namespace Bulliten.API.Controllers
 
         // GET: api/<PostController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult GetPosts()
         {
-            return new string[] { "value1", "value2" };
+            var ctxUser = GetAccountFromContext();
+            var posts = _context.Posts.Where(p => p.Author.ID == ctxUser.ID);
+
+            return Ok(new { posts });
         }
 
         // GET api/<PostController>/5
@@ -42,10 +45,10 @@ namespace Bulliten.API.Controllers
         [HttpPost("create")]
         public async Task CreatePost([FromForm] Post formPost)
         {
-            var user = GetAccountFromContext();
-            var dbUser = await _context.UserAccounts.FirstAsync(u => u.ID == user.ID);
+            var ctxUser = GetAccountFromContext();
+            var dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == ctxUser.ID);
 
-            formPost.Author = user;
+            formPost.Author = ctxUser;
             formPost.CreationDate = DateTime.Now;
 
             dbUser.Posts.Add(formPost);

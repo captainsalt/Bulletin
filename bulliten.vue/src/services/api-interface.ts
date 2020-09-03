@@ -41,3 +41,19 @@ export function createPost(content: string): Promise<Response> {
   });
 }
 
+export async function getPosts(): Promise<Post[]> {
+  const headers = new Headers();
+  headers.append("Authorization", auth.state.token || "");
+
+  const response = await fetch(`${baseUrl}/api/post`, {
+    method: "GET",
+    mode: "cors",
+    headers
+  });
+
+  if (!response.ok)
+    throw Error("Error getting posts");
+
+  return (await response.json()).posts;
+}
+
