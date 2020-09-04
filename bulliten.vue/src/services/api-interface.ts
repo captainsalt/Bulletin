@@ -61,3 +61,10 @@ export async function getPosts(): Promise<Post[]> {
 
   return (await response.json()).posts;
 }
+
+export async function getUser(username: string): Promise<UserAccount> {
+  return {
+    id: 1000,
+    username: "Placeholder username"
+  }
+}

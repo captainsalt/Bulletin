@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Dashboard from "../views/Dashboard.vue";
+import Profile from "../views/Profile.vue";
 import store from "@/store/index";
 
 Vue.use(VueRouter);
@@ -34,15 +35,14 @@ const routes: Array<RouteConfig> = [
     path: "/dashboard",
     name: "Dashboard",
     component: Dashboard,
-    beforeEnter: (to, from, next) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const token = (store.state as any).auth.token;
-
-      if (token)
-        next();
-      else
-        next("/login");
-    }
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/profile/:username",
+    name: "profile",
+    component: Profile,
+    props: true,
+    meta: { requiresAuth: true }
   }
 ];
 
@@ -50,6 +50,21 @@ const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const token = (store.state as any).auth.token;
+
+    if (token)
+      next();
+    else
+      next("/login");
+  }
+  else {
+    next();
+  }
 });
 
 export default router;
