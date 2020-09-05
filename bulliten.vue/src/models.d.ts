@@ -9,3 +9,8 @@ declare interface Post {
   content: string;
   creationDate: Date;
 }
+
+declare interface AuthResponse {
+  token: string;
+  user: UserAccount;
+}

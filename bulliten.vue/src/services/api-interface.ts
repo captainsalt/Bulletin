@@ -2,33 +2,48 @@ import store from "@/store/index";
 
 const baseUrl: string = process.env.VUE_APP_API_URL;
 
+export interface ApiResponse {
+  token: string;
+  user: UserAccount;
+}
+
 function getAuthToken(): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (store.state as any).auth.token;
 }
 
-export function createAccount(username: string, password: string): Promise<Response> {
+export async function createAccount(username: string, password: string): Promise<ApiResponse> {
   const form = new FormData();
   form.append("username", username);
   form.append("password", password);
 
-  return fetch(`${baseUrl}/api/user/create`, {
+  const response = await fetch(`${baseUrl}/api/user/create`, {
     method: "POST",
     mode: "cors",
     body: form
   });
+
+  if (!response.ok)
+    throw Error("Error creating account");
+
+  return response.json();
 }
 
-export function login(username: string, password: string): Promise<Response> {
+export async function login(username: string, password: string): Promise<ApiResponse> {
   const form = new FormData();
   form.append("username", username);
   form.append("password", password);
 
-  return fetch(`${baseUrl}/api/user/login`, {
+  const response = await fetch(`${baseUrl}/api/user/login`, {
     method: "POST",
     mode: "cors",
     body: form
   });
+
+  if (!response.ok)
+    throw Error("Error creating account");
+
+  return response.json();
 }
 
 export function createPost(content: string): Promise<Response> {
@@ -66,5 +81,5 @@ export async function getUser(username: string): Promise<UserAccount> {
   return {
     id: 1000,
     username: "Placeholder username"
-  }
+  };
 }

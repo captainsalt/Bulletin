@@ -32,7 +32,7 @@
 <script>
 import Vue from "vue";
 import * as api from "@/services/api-interface";
-import { mapMutations } from "vuex";
+import { mapMutations, mapActions } from "vuex";
 import { SET_TOKEN } from "@/store/mutations";
 
 export default Vue.extend({
@@ -45,17 +45,18 @@ export default Vue.extend({
     ...mapMutations("auth", [
       SET_TOKEN
     ]),
+    ...mapActions("auth", [
+      "storeAuth"
+    ]),
     async submit() {
-      const response = await api.createAccount(this.username, this.password);
-
-      if (!response.ok) {
-        this.errorMsg = (await response.json()).message;
-        return;
+      try {
+        const { token, user } = await api.createAccount(this.username, this.password);
+        this.storeAuth({ token, user });
+        await this.$router.push("/dashboard");
       }
-
-      const token = (await response.json()).token;
-      this.SET_TOKEN(token);
-      await this.$router.push("/dashboard");
+      catch (error) {
+        this.errorMsg = error.message;
+      }
     }
   }
 });

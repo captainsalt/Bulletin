@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SET_TOKEN, SET_USER } from "./mutations";
+import { ActionContext } from "vuex";
 
 export default {
   namespaced: true,
@@ -13,6 +14,12 @@ export default {
     },
     [SET_USER](state: any, payload: UserAccount) {
       state.user = payload;
+    }
+  },
+  actions: {
+    storeAuth({ commit }: ActionContext<any, any>, { token, user }: AuthResponse) {
+      commit(SET_TOKEN, token);
+      commit(SET_USER, user);
     }
   }
 };
