@@ -33,6 +33,17 @@ namespace Bulliten.API.Controllers
             return await _context.UserAccounts.ToListAsync();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetUserByUsername([FromQuery] string username)
+        {
+            var user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+                return BadRequest(new Error("User does not exit", 400));
+
+            return Ok(new { user });
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccount([FromForm] UserAccount formAccount)
         {

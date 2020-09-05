@@ -7,9 +7,14 @@ export interface ApiResponse {
   user: UserAccount;
 }
 
-function getAuthToken(): string {
+function getAuthHeader(): Headers {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (store.state as any).auth.token;
+  const token = (store.state as any).auth.token || "";
+  const headers = new Headers();
+
+  headers.append("Authorization", token);
+
+  return headers;
 }
 
 export async function createAccount(username: string, password: string): Promise<ApiResponse> {
@@ -48,27 +53,22 @@ export async function login(username: string, password: string): Promise<ApiResp
 
 export function createPost(content: string): Promise<Response> {
   const form = new FormData();
-  const headers = new Headers();
 
   form.append("content", content);
-  headers.append("Authorization", getAuthToken() || "");
 
   return fetch(`${baseUrl}/api/post/create`, {
     method: "POST",
     mode: "cors",
     body: form,
-    headers
+    headers: getAuthHeader()
   });
 }
 
 export async function getPosts(): Promise<Post[]> {
-  const headers = new Headers();
-  headers.append("Authorization", getAuthToken() || "");
-
   const response = await fetch(`${baseUrl}/api/post`, {
     method: "GET",
     mode: "cors",
-    headers
+    headers: getAuthHeader()
   });
 
   if (!response.ok)
@@ -78,8 +78,11 @@ export async function getPosts(): Promise<Post[]> {
 }
 
 export async function getUser(username: string): Promise<UserAccount> {
-  return {
-    id: 1000,
-    username: "Placeholder username"
-  };
+  const response = await fetch(`${baseUrl}/api/user?username=${username}`, {
+    method: "GET",
+    mode: "cors",
+    headers: getAuthHeader()
+  });
+
+  return (await response.json()).user;
 }
