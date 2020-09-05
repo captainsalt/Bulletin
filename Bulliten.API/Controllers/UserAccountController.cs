@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Bulliten.API.Models;
+using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Mvc;

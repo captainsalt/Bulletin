@@ -1,4 +1,5 @@
 ﻿using Bulliten.API.Models;
+using Bulliten.API.Models.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
