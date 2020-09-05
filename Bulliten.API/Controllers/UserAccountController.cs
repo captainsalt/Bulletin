@@ -46,7 +46,7 @@ namespace Bulliten.API.Controllers
 
             var auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
 
-            return StatusCode(201, new { token = auth.Token });
+            return StatusCode(201, new { token = auth.Token, user = formAccount });
         }
 
         [HttpPost("login")]
@@ -57,8 +57,8 @@ namespace Bulliten.API.Controllers
             if (matchedAccount == null)
                 return BadRequest(new Error("Invalid username or password", 400));
 
-            var auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
-            return Ok(new { token = auth.Token });
+            var auth = await _authService.Authenticate(new AuthenticationRequest { Username = matchedAccount.Username, Password = matchedAccount.Password });
+            return Ok(new { token = auth.Token, user = matchedAccount });
         }
     }
 }
