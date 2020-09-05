@@ -46,7 +46,7 @@ export async function login(username: string, password: string): Promise<ApiResp
   });
 
   if (!response.ok)
-    throw Error("Error creating account");
+    throw Error("Invalid login credentials");
 
   return response.json();
 }
