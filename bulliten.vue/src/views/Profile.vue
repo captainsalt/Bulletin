@@ -4,9 +4,17 @@
       {{ errorMsg }}
     </v-alert>
 
-    <v-row>
-      {{ profileUser.username }}
-    </v-row>
+    <div v-else>
+      <v-row>
+        <p>
+          {{ profileUser.username }}
+        </p>
+      </v-row>
+
+      <v-row>
+        <v-btn>Follow</v-btn>
+      </v-row>
+    </div>
   </v-container>
 </template>
 
