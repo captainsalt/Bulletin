@@ -5,6 +5,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Bulliten.API.Models;
 using Bulliten.API.Services;
+using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,27 @@ namespace Bulliten.API.Controllers
             return Ok(new { user });
         }
 
+        [HttpPost("follow")]
+        [Authorize]
+        public async Task<IActionResult> FollowUser([FromQuery] string username)
+        {
+            var ctxUser = GetAccountFromContext();
+
+            if (ctxUser.Username == username)
+                return BadRequest(new Error("Cannot follow yourself", 400));
+
+            var dbTargetUser = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
+            var targetUser = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == ctxUser.Username);
+
+            if (dbTargetUser == null)
+                return BadRequest(new Error("User does not exist", 400));
+
+            dbTargetUser.Followers.Add(targetUser);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccount([FromForm] UserAccount formAccount)
         {
@@ -71,5 +93,8 @@ namespace Bulliten.API.Controllers
             var auth = await _authService.Authenticate(new AuthenticationRequest { Username = matchedAccount.Username, Password = matchedAccount.Password });
             return Ok(new { token = auth.Token, user = matchedAccount });
         }
+
+        private UserAccount GetAccountFromContext() =>
+           (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
     }
 }
