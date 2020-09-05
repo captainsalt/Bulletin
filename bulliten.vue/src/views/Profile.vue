@@ -1,10 +1,10 @@
 <template>
   <v-container>
-    <v-alert v-if="errorMsg" type="error">
-      {{ errorMsg }}
-    </v-alert>
+    <div>
+      <v-alert v-if="errorMsg" type="error">
+        {{ errorMsg }}
+      </v-alert>
 
-    <div v-else>
       <v-row>
         <p>
           {{ profileUser.username }}
@@ -12,7 +12,9 @@
       </v-row>
 
       <v-row>
-        <v-btn>Follow</v-btn>
+        <v-btn @click="follow">
+          Follow
+        </v-btn>
       </v-row>
     </div>
   </v-container>
@@ -40,6 +42,16 @@ export default Vue.extend({
     }
     catch (error) {
       this.errorMsg = error.message;
+    }
+  },
+  methods: {
+    async follow() {
+      try {
+        await api.followUser(this.profileUser.username);
+      }
+      catch (error) {
+        this.errorMsg = error.message;
+      }
     }
   }
 });

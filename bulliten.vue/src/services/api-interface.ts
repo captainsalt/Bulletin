@@ -89,3 +89,14 @@ export async function getUser(username: string): Promise<UserAccount> {
 
   return (await response.json()).user;
 }
+
+export async function followUser(username: string): Promise<void> {
+  const response = await fetch(`${baseUrl}/api/user/follow?username=${username}`, {
+    method: "POST",
+    mode: "cors",
+    headers: getAuthHeader()
+  });
+
+  if (!response.ok)
+    throw Error((await response.json()).message);
+}

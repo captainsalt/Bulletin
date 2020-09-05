@@ -60,7 +60,12 @@ namespace Bulliten.API.Controllers
             if (dbTargetUser == null)
                 return BadRequest(new Error("User does not exist", 400));
 
-            dbTargetUser.Followers.Add(targetUser);
+            dbTargetUser.Followers.Add(new UserXUser
+            {
+                Followee = dbTargetUser,
+                Follower = ctxUser,
+            });
+
             await _context.SaveChangesAsync();
 
             return Ok();
