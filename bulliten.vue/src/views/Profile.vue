@@ -1,5 +1,9 @@
 <template>
   <v-container>
+    <v-alert v-if="errorMsg" type="error">
+      {{ errorMsg }}
+    </v-alert>
+
     <v-row>
       {{ profileUser.username }}
     </v-row>
@@ -18,11 +22,17 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    profileUser: {} as UserAccount
+    profileUser: {} as UserAccount,
+    errorMsg: ""
   }),
   async beforeMount() {
-    const user = await api.getUser(this.username);
-    this.profileUser = user;
+    try {
+      const user = await api.getUser(this.username);
+      this.profileUser = user;
+    }
+    catch (error) {
+      this.errorMsg = error.message;
+    }
   }
 });
 </script>

@@ -84,5 +84,8 @@ export async function getUser(username: string): Promise<UserAccount> {
     headers: getAuthHeader()
   });
 
+  if (!response.ok)
+    throw Error("User does not exist");
+
   return (await response.json()).user;
 }
