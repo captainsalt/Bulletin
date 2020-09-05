@@ -10,12 +10,9 @@ namespace Bulliten.API.Models
     {
         public string Message { get; set; }
 
-        public int Code { get; set; }
-
-        public Error(string message, int code)
+        public Error(string message)
         {
             Message = message;
-            Code = code;
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Bulliten.API.Controllers
             var user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
-                return BadRequest(new Error("User does not exit", 400));
+                return BadRequest(new Error("User does not exit"));
 
             return Ok(new { user });
         }
@@ -53,13 +53,13 @@ namespace Bulliten.API.Controllers
             var ctxUser = GetAccountFromContext();
 
             if (ctxUser.Username == username)
-                return BadRequest(new Error("Cannot follow yourself", 400));
+                return BadRequest(new Error("Cannot follow yourself"));
 
             var dbTargetUser = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
             var targetUser = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == ctxUser.Username);
 
             if (dbTargetUser == null)
-                return BadRequest(new Error("User does not exist", 400));
+                return BadRequest(new Error("User does not exist"));
 
             dbTargetUser.Followers.Add(new UserXUser
             {
@@ -78,7 +78,7 @@ namespace Bulliten.API.Controllers
             var isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
 
             if (isInvalidUsername)
-                return BadRequest(new Error($"Username \"{formAccount.Username}\" is already in use", 400));
+                return BadRequest(new Error($"Username \"{formAccount.Username}\" is already in use"));
 
             await _context.UserAccounts.AddAsync(formAccount);
             await _context.SaveChangesAsync();
@@ -94,7 +94,7 @@ namespace Bulliten.API.Controllers
             var matchedAccount = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
 
             if (matchedAccount == null)
-                return BadRequest(new Error("Invalid username or password", 400));
+                return BadRequest(new Error("Invalid username or password"));
 
             var auth = await _authService.Authenticate(new AuthenticationRequest { Username = matchedAccount.Username, Password = matchedAccount.Password });
             return Ok(new { token = auth.Token, user = matchedAccount });
