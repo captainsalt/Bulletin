@@ -1,13 +1,14 @@
 declare interface UserAccount {
   id: number;
   username: string;
+  creationDate: string;
 }
 
 declare interface Post {
   id: number;
   author: IUserAccount;
   content: string;
-  creationDate: Date;
+  creationDate: string;
 }
 
 declare interface AuthResponse {
