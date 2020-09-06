@@ -6,9 +6,16 @@ using System.Threading.Tasks;
 
 namespace Bulliten.API.Models
 {
-    public class UserAccount
+    public class UserAccount : IEntity
     {
+        public UserAccount()
+        {
+            CreationDate = DateTime.UtcNow;
+        }
+
         public int ID { get; set; }
+
+        public DateTime CreationDate { get; set; }
 
         public string Username { get; set; }
 
