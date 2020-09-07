@@ -30,6 +30,15 @@ export default {
       catch (error) {
         throw error;
       }
+    },
+    async register({ dispatch }: ActionContext<any, any>, { username, password }: { username: string; password: string }) {
+      try {
+        const { token, user } = await api.createAccount(username, password);
+        await dispatch("storeAuth", { token, user });
+      }
+      catch (error) {
+        throw error;
+      }
     }
   }
 };

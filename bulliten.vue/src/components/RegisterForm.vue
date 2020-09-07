@@ -31,9 +31,7 @@
 
 <script>
 import Vue from "vue";
-import * as api from "@/services/api-interface";
-import { mapMutations, mapActions } from "vuex";
-import { SET_TOKEN } from "@/store/mutations";
+import { mapActions } from "vuex";
 
 export default Vue.extend({
   data: () => ({
@@ -42,16 +40,12 @@ export default Vue.extend({
     errorMsg: ""
   }),
   methods: {
-    ...mapMutations("auth", [
-      SET_TOKEN
-    ]),
     ...mapActions("auth", [
-      "storeAuth"
+      "register"
     ]),
     async submit() {
       try {
-        const { token, user } = await api.createAccount(this.username, this.password);
-        this.storeAuth({ token, user });
+        await this.register({ username: this.username, password: this.password });
         await this.$router.push("/dashboard");
       }
       catch (error) {
