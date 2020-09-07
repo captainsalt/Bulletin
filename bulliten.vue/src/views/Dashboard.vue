@@ -1,7 +1,16 @@
 <template>
   <v-container fill-height>
-    <BullitenBoard class="bulliten"/>
-    <CreatePostForm class="create"/>
+    <v-row no-gutters>
+      <v-col sm="8">
+        <BullitenBoard/>
+      </v-col>
+
+      <v-col>
+        <div id="grid">
+          <CreatePostForm class="create"/>
+        </div>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -19,12 +28,17 @@ export default Vue.extend({
 </script>
 
 <style>
-.bulliten {
-  height: 100%;
+.create {
+  grid-area: create;
 }
 
-.create {
-  position: absolute;
-  bottom: 0;
+#grid {
+  height: 98vh;
+  display: grid;
+  position: sticky;
+  top: 0;
+  grid-template:
+    "." 5fr
+    "create" 1fr / 100%;
 }
 </style>
