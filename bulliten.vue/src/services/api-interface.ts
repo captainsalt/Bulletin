@@ -2,11 +2,6 @@ import store from "@/store/index";
 
 const baseUrl: string = process.env.VUE_APP_API_URL;
 
-export interface ApiResponse {
-  token: string;
-  user: UserAccount;
-}
-
 function getAuthHeader(): Headers {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const token = (store.state as any).auth.token || "";
@@ -17,7 +12,7 @@ function getAuthHeader(): Headers {
   return headers;
 }
 
-export async function createAccount(username: string, password: string): Promise<ApiResponse> {
+export async function createAccount(username: string, password: string): Promise<AuthResponse> {
   const form = new FormData();
   form.append("username", username);
   form.append("password", password);
@@ -34,7 +29,7 @@ export async function createAccount(username: string, password: string): Promise
   return response.json();
 }
 
-export async function login(username: string, password: string): Promise<ApiResponse> {
+export async function login(username: string, password: string): Promise<AuthResponse> {
   const form = new FormData();
   form.append("username", username);
   form.append("password", password);
