@@ -12,6 +12,10 @@ function getAuthHeader(): Headers {
   return headers;
 }
 
+async function getErrorMesssage(response: Response) : Promise<string> {
+  return (await response.json()).message;
+}
+
 export async function createAccount(username: string, password: string): Promise<AuthResponse> {
   const form = new FormData();
   form.append("username", username);
@@ -24,7 +28,7 @@ export async function createAccount(username: string, password: string): Promise
   });
 
   if (!response.ok)
-    throw Error("Error creating account");
+    throw Error(await getErrorMesssage(response));
 
   return response.json();
 }
@@ -41,7 +45,7 @@ export async function login(username: string, password: string): Promise<AuthRes
   });
 
   if (!response.ok)
-    throw Error("Invalid login credentials");
+    throw Error(await getErrorMesssage(response));
 
   return response.json();
 }
@@ -67,7 +71,7 @@ export async function getPosts(): Promise<Post[]> {
   });
 
   if (!response.ok)
-    throw Error("Error getting posts");
+    throw Error(await getErrorMesssage(response));
 
   return (await response.json()).posts;
 }
@@ -80,7 +84,7 @@ export async function getUser(username: string): Promise<UserAccount> {
   });
 
   if (!response.ok)
-    throw Error("User does not exist");
+    throw Error(await getErrorMesssage(response));
 
   return (await response.json()).user;
 }
