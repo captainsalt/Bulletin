@@ -31,7 +31,6 @@
 
 <script lang="ts">
 import Vue from "vue";
-import * as api from "@/services/api-interface";
 import { mapActions } from "vuex";
 
 export default Vue.extend({
@@ -42,12 +41,11 @@ export default Vue.extend({
   }),
   methods: {
     ...mapActions("auth", [
-      "storeAuth"
+      "login"
     ]),
     async submit() {
       try {
-        const { token, user } = await api.login(this.username, this.password);
-        this.storeAuth({ token, user });
+        await this.login({ username: this.username, password: this.password });
         await this.$router.push("/dashboard");
       }
       catch (error) {

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SET_TOKEN, SET_USER } from "./mutations";
 import { ActionContext } from "vuex";
+import * as api from "@/services/api-interface";
 
 export default {
   namespaced: true,
@@ -20,6 +21,15 @@ export default {
     storeAuth({ commit }: ActionContext<any, any>, { token, user }: AuthResponse) {
       commit(SET_TOKEN, token);
       commit(SET_USER, user);
+    },
+    async login({ dispatch }: ActionContext<any, any>, { username, password }: { username: string; password: string }) {
+      try {
+        const { token, user } = await api.login(username, password);
+        await dispatch("storeAuth", { token, user });
+      }
+      catch (error) {
+        throw error;
+      }
     }
   }
 };
