@@ -29,7 +29,7 @@ namespace Bulliten.API
         {
             services.AddCors();
             services.AddControllers();
-            services.AddDbContext<BullitenDBContext>(ServiceLifetime.Singleton);
+            services.AddDbContext<BullitenDBContext>(ServiceLifetime.Transient);
             services.AddScoped<IAuthenticationService, AuthenticationService>();
         }
 
