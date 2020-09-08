@@ -8,7 +8,7 @@
       <v-card outlined>
         <v-card-title>{{ profileUser.username }}</v-card-title>
 
-        <v-card-actions>
+        <v-card-actions v-if="!isOwnProfile">
           <v-btn text @click="follow">
             Follow
           </v-btn>
@@ -24,6 +24,7 @@
 <script lang="ts">
 import Vue from "vue";
 import * as api from "@/services/api-interface";
+import { mapState } from "vuex";
 
 export default Vue.extend({
   props: {
@@ -38,6 +39,12 @@ export default Vue.extend({
     followers: 0,
     following: 0
   }),
+  computed: {
+    ...mapState("auth", ["user"]),
+    isOwnProfile() {
+      return this.user.username === this.username;
+    }
+  },
   async beforeMount() {
     try {
       const user = await api.getUser(this.username);
