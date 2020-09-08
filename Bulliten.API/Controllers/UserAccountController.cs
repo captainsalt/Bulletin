@@ -41,7 +41,7 @@ namespace Bulliten.API.Controllers
             var user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
-                return BadRequest(new Error("User does not exit"));
+                return BadRequest(new Error("User does not exist"));
 
             return Ok(new { user });
         }
@@ -57,7 +57,7 @@ namespace Bulliten.API.Controllers
             var following = await _context.FollowerTable.Where(uxu => uxu.FollowerId == user.ID).CountAsync();
 
             if (user == null)
-                return BadRequest(new Error("User does not exit"));
+                return BadRequest(new Error("User does not exist"));
 
             return Ok(new { followers = user.Followers.Count, following });
         }
