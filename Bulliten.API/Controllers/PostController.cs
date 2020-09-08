@@ -29,7 +29,7 @@ namespace Bulliten.API.Controllers
         public IActionResult GetPosts()
         {
             var ctxUser = GetAccountFromContext();
-            var posts = _context.Posts.Where(p => p.Author.ID == ctxUser.ID);
+            var posts = _context.Posts.Include(p => p.Author).Where(p => p.Author.ID == ctxUser.ID);
 
             return Ok(new { posts });
         }
