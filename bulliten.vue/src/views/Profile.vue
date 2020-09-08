@@ -7,11 +7,15 @@
 
       <v-card outlined>
         <v-card-title>{{ profileUser.username }}</v-card-title>
+
+        <v-card-actions>
+          <v-btn text @click="follow">
+            Follow
+          </v-btn>
+        </v-card-actions>
+
         <v-card-text>Followers: {{ followers }} </v-card-text>
         <v-card-text>Following: {{ following }} </v-card-text>
-        <v-btn @click="follow">
-          Follow
-        </v-btn>
       </v-card>
     </v-container>
   </div>
