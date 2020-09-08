@@ -1,23 +1,20 @@
 <template>
-  <v-container>
-    <div>
+  <div>
+    <v-container fluid>
       <v-alert v-if="errorMsg" type="error">
         {{ errorMsg }}
       </v-alert>
 
-      <v-row>
-        <p>
-          {{ profileUser.username }}
-        </p>
-      </v-row>
-
-      <v-row>
+      <v-card outlined>
+        <v-card-title>{{ profileUser.username }}</v-card-title>
+        <v-card-text>Followers: {{ followers }} </v-card-text>
+        <v-card-text>Following: {{ following }} </v-card-text>
         <v-btn @click="follow">
           Follow
         </v-btn>
-      </v-row>
-    </div>
-  </v-container>
+      </v-card>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -33,11 +30,17 @@ export default Vue.extend({
   },
   data: () => ({
     profileUser: {} as UserAccount,
-    errorMsg: ""
+    errorMsg: "",
+    followers: 0,
+    following: 0
   }),
   async beforeMount() {
     try {
       const user = await api.getUser(this.username);
+      const followInfo = await api.getFollowInfo(this.username);
+
+      this.followers = followInfo.followers;
+      this.following = followInfo.following;
       this.profileUser = user;
     }
     catch (error) {

@@ -46,6 +46,22 @@ namespace Bulliten.API.Controllers
             return Ok(new { user });
         }
 
+        [HttpGet("followinfo")]
+        [Authorize]
+        public async Task<IActionResult> GetUserFollowings([FromQuery] string username)
+        {
+            var user = await _context.UserAccounts
+                .Include(u => u.Followers)
+                .SingleOrDefaultAsync(u => u.Username == username);
+
+            var following = await _context.FollowerTable.Where(uxu => uxu.FollowerId == user.ID).CountAsync();
+
+            if (user == null)
+                return BadRequest(new Error("User does not exit"));
+
+            return Ok(new { followers = user.Followers.Count, following });
+        }
+
         [HttpPost("follow")]
         [Authorize]
         public async Task<IActionResult> FollowUser([FromQuery] string username)
@@ -55,15 +71,22 @@ namespace Bulliten.API.Controllers
             if (ctxUser.Username == username)
                 return BadRequest(new Error("Cannot follow yourself"));
 
-            var dbTargetUser = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
-            var targetUser = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == ctxUser.Username);
+            var targetUser = await _context.UserAccounts
+               .Include(u => u.Followers)
+               .SingleOrDefaultAsync(u => u.Username == username);
 
-            if (dbTargetUser == null)
+            if (targetUser == null)
                 return BadRequest(new Error("User does not exist"));
 
-            dbTargetUser.Followers.Add(new UserXUser
+            var followRecord = targetUser.Followers
+                .SingleOrDefault(uxu => uxu.FollowerId == ctxUser.ID);
+
+            if (followRecord != null)
+                return BadRequest(new Error("Already following"));
+
+            targetUser.Followers.Add(new UserXUser
             {
-                Followee = dbTargetUser,
+                Followee = targetUser,
                 Follower = ctxUser,
             });
 

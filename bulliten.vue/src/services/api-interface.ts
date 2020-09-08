@@ -12,7 +12,7 @@ function getAuthHeader(): Headers {
   return headers;
 }
 
-async function getErrorMesssage(response: Response) : Promise<string> {
+async function getErrorMesssage(response: Response): Promise<string> {
   return (await response.json()).message;
 }
 
@@ -98,4 +98,17 @@ export async function followUser(username: string): Promise<void> {
 
   if (!response.ok)
     throw Error((await response.json()).message);
+}
+
+export async function getFollowInfo(username: string): Promise<{ followers: number; following: number }> {
+  const response = await fetch(`${baseUrl}/api/user/followinfo?username=${username}`, {
+    method: "GET",
+    mode: "cors",
+    headers: getAuthHeader()
+  });
+
+  if (!response.ok)
+    throw Error((await response.json()).message);
+
+  return response.json();
 }
