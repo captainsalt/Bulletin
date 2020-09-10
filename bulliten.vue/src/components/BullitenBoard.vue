@@ -11,17 +11,16 @@
 <script lang="ts">
 import Vue from "vue";
 import PostElement from "@/components/Post.vue";
-import { getPosts } from "@/services/api-interface";
 
 export default Vue.extend({
   components: {
     PostElement
   },
-  data: () => ({
-    posts: [] as Array<Post>
-  }),
-  async beforeMount() {
-    this.posts = await getPosts();
+  props: {
+    posts: {
+      type: Array,
+      required: true
+    }
   }
 });
 </script>

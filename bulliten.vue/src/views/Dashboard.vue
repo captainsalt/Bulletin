@@ -2,7 +2,7 @@
   <v-container fill-height>
     <v-row no-gutters>
       <v-col sm="8">
-        <BullitenBoard/>
+        <BullitenBoard :posts="posts"/>
       </v-col>
 
       <v-col>
@@ -18,11 +18,18 @@
 import Vue from "vue";
 import CreatePostForm from "@/components/CreatePostForm.vue";
 import BullitenBoard from "@/components/BullitenBoard.vue";
+import { getPosts } from "@/services/api-interface";
 
 export default Vue.extend({
   components: {
     CreatePostForm,
     BullitenBoard
+  },
+  data: () => ({
+    posts: [] as Array<Post>
+  }),
+  async beforeMount() {
+    this.posts = await getPosts();
   }
 });
 </script>
