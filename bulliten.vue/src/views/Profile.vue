@@ -9,7 +9,18 @@
         <v-card-title>{{ profileUser.username }}</v-card-title>
 
         <v-card-actions v-if="!isOwnProfile">
-          <v-btn text @click="follow">
+          <v-btn
+            v-if="isFollowing"
+            text
+            @click="unfollow"
+          >
+            Unfollow
+          </v-btn>
+          <v-btn
+            v-else
+            text
+            @click="follow"
+          >
             Follow
           </v-btn>
         </v-card-actions>
@@ -46,7 +57,8 @@ export default Vue.extend({
     posts: [] as Array<Post>,
     errorMsg: "",
     followers: [] as Array<UserAccount>,
-    following: [] as Array<UserAccount>
+    following: [] as Array<UserAccount>,
+    isFollowing: false
   }),
   computed: {
     ...mapState("auth", {
@@ -66,6 +78,7 @@ export default Vue.extend({
       this.following = followInfo.following;
       this.profileUser = user;
       this.posts = posts;
+      this.isFollowing = followInfo.followers.some(user => user.id === this.authUser.id);
     }
     catch (error) {
       this.errorMsg = error.message;
@@ -75,6 +88,14 @@ export default Vue.extend({
     async follow() {
       try {
         await api.followUser(this.profileUser.username);
+      }
+      catch (error) {
+        this.errorMsg = error.message;
+      }
+    },
+    async unfollow() {
+      try {
+        await api.unfollowUser(this.profileUser.username);
       }
       catch (error) {
         this.errorMsg = error.message;

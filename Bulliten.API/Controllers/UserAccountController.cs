@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Threading.Tasks;
-using Bulliten.API.Models;
+﻿using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
 using Bulliten.API.Utilities;
@@ -11,6 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading.Tasks;
 
 namespace Bulliten.API.Controllers
 {
@@ -98,6 +98,34 @@ namespace Bulliten.API.Controllers
                 Follower = ctxUser,
             });
 
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpPost("unfollow")]
+        [Authorize]
+        public async Task<IActionResult> UnfollowUser([FromQuery] string username)
+        {
+            var ctxUser = GetAccountFromContext();
+
+            if (ctxUser.Username == username)
+                return BadRequest(new Error("Cannot unfollow yourself"));
+
+            var targetUser = await _context.UserAccounts
+               .Include(u => u.Followers)
+               .SingleOrDefaultAsync(u => u.Username == username);
+
+            if (targetUser == null)
+                return BadRequest(new Error("User does not exist"));
+
+            var followRecord = targetUser.Followers
+                .SingleOrDefault(uxu => uxu.FollowerId == ctxUser.ID);
+
+            if (followRecord == null)
+                return Ok();
+
+            targetUser.Followers.Remove(followRecord);
             await _context.SaveChangesAsync();
 
             return Ok();
