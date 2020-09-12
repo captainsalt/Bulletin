@@ -7,7 +7,7 @@ import store from "@/store/index";
 
 Vue.use(VueRouter);
 
-const routes: Array<RouteConfig> = [
+const routes: RouteConfig[] = [
   {
     path: "/",
     name: "Home",

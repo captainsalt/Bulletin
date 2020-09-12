@@ -27,7 +27,7 @@ export default Vue.extend({
     BullitenBoard
   },
   data: () => ({
-    posts: [] as Array<Post>
+    posts: [] as Post[]
   }),
   computed: {
     ...mapState("auth", [

@@ -54,10 +54,10 @@ export default Vue.extend({
   },
   data: () => ({
     profileUser: {} as UserAccount,
-    posts: [] as Array<Post>,
+    posts: [] as Post[],
     errorMsg: "",
-    followers: [] as Array<UserAccount>,
-    following: [] as Array<UserAccount>,
+    followers: [] as UserAccount[],
+    following: [] as UserAccount[],
     isFollowing: false
   }),
   computed: {
