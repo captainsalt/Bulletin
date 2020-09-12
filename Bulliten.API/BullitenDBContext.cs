@@ -27,9 +27,7 @@ namespace Bulliten.API
                 .HasForeignKey(user => user.FolloweeId);
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseSqlite("Filename=Bulliten.db");
-        }
     }
 }

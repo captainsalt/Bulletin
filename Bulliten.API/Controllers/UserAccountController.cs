@@ -20,8 +20,8 @@ namespace Bulliten.API.Controllers
         private readonly IAuthenticationService _authService;
 
         public UserAccountController(
-            BullitenDBContext context, 
-            ILogger<UserAccountController> logger, 
+            BullitenDBContext context,
+            ILogger<UserAccountController> logger,
             IAuthenticationService accountService)
         {
             _logger = logger;
@@ -30,10 +30,8 @@ namespace Bulliten.API.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IEnumerable<UserAccount>> GetUsers()
-        {
-            return await _context.UserAccounts.ToListAsync();
-        }
+        public async Task<IEnumerable<UserAccount>> GetUsers() =>
+            await _context.UserAccounts.ToListAsync();
 
         [HttpGet]
         public async Task<IActionResult> GetUserByUsername([FromQuery] string username)
@@ -170,9 +168,7 @@ namespace Bulliten.API.Controllers
             return Ok(new { token = auth.Token, user = matchedAccount });
         }
 
-        private UserAccount GetAccountFromContext()
-        {
-            return (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
-        }
+        private UserAccount GetAccountFromContext() =>
+            (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
     }
 }
