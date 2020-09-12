@@ -7,6 +7,7 @@ using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,10 +18,12 @@ namespace Bulliten.API.Controllers
     [ApiController]
     public class PostController : ControllerBase
     {
+        private readonly ILogger<PostController> _logger;
         private readonly BullitenDBContext _context;
 
-        public PostController(BullitenDBContext context)
+        public PostController(ILogger<PostController> logger, BullitenDBContext context)
         {
+            _logger = logger;
             _context = context;
         }
 
@@ -31,8 +34,8 @@ namespace Bulliten.API.Controllers
             var ctxUser = GetAccountFromContext();
 
             var following = await _context.FollowerTable
-                .Where(fr => fr.FolloweeId == ctxUser.ID)
-                .Select(fr => fr.FollowerId)
+                .Where(fr => fr.FollowerId == ctxUser.ID)
+                .Select(fr => fr.FolloweeId)
                 .ToListAsync();
 
             var posts = _context.Posts.Include(p => p.Author);
@@ -40,7 +43,9 @@ namespace Bulliten.API.Controllers
             var userPosts = await posts.Where(p => p.Author.ID == ctxUser.ID).ToListAsync();
             var followingPosts = await posts.Where(p => following.Contains(p.Author.ID)).ToListAsync();
 
-            return Ok(new { posts = userPosts.Concat(followingPosts).OrderBy(p => p.CreationDate) });
+            var orderedPosts = userPosts.Concat(followingPosts).OrderByDescending(p => p.CreationDate);
+
+            return Ok(new { posts = orderedPosts });
         }
 
         // GET api/<PostController>/5
