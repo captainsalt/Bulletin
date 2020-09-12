@@ -1,6 +1,6 @@
 ﻿namespace Bulliten.API.Models
 {
-    public class UserXUser
+    public class FollowRecord
     {
         public int FolloweeId { get; set; }
         public UserAccount Followee { get; set; }

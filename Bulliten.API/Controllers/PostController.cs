@@ -46,7 +46,7 @@ namespace Bulliten.API.Controllers
             UserAccount user = GetAccountFromContext();
 
             List<int> following = await _context.FollowerTable
-                .Where(uxu => uxu.FollowerId == user.ID)
+                .Where(fr => fr.FollowerId == user.ID)
                 .Select(fr => fr.FolloweeId)
                 .ToListAsync();
 

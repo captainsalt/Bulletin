@@ -14,14 +14,14 @@ namespace Bulliten.API
 
         public DbSet<Post> Posts { get; set; }
 
-        public DbSet<UserXUser> FollowerTable { get; set; }
+        public DbSet<FollowRecord> FollowerTable { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<UserXUser>()
+            modelBuilder.Entity<FollowRecord>()
                 .HasKey(fr => new { fr.FolloweeId, fr.FollowerId });
 
-            modelBuilder.Entity<UserXUser>()
+            modelBuilder.Entity<FollowRecord>()
                 .HasOne(user => user.Followee)
                 .WithMany(user => user.Followers)
                 .HasForeignKey(user => user.FolloweeId);

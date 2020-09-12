@@ -55,13 +55,13 @@ namespace Bulliten.API.Controllers
                 return BadRequest(new Error("User does not exist"));
 
             List<UserAccount> followers = await _context.FollowerTable
-                .Where(uxu => uxu.FolloweeId == user.ID)
-                .Select(uxu => uxu.Follower)
+                .Where(fr => fr.FolloweeId == user.ID)
+                .Select(fr => fr.Follower)
                 .ToListAsync();
 
             List<UserAccount> following = await _context.FollowerTable
-                .Where(uxu => uxu.FollowerId == user.ID)
-                .Select(uxu => uxu.Followee)
+                .Where(fr => fr.FollowerId == user.ID)
+                .Select(fr => fr.Followee)
                 .ToListAsync();
 
             return Ok(new { following, followers });
@@ -83,13 +83,13 @@ namespace Bulliten.API.Controllers
             if (targetUser == null)
                 return BadRequest(new Error("User does not exist"));
 
-            UserXUser followRecord = targetUser.Followers
-                .SingleOrDefault(uxu => uxu.FollowerId == ctxUser.ID);
+            FollowRecord followRecord = targetUser.Followers
+                .SingleOrDefault(fr => fr.FollowerId == ctxUser.ID);
 
             if (followRecord != null)
                 return BadRequest(new Error("Already following"));
 
-            targetUser.Followers.Add(new UserXUser
+            targetUser.Followers.Add(new FollowRecord
             {
                 Followee = targetUser,
                 Follower = ctxUser,
@@ -116,8 +116,8 @@ namespace Bulliten.API.Controllers
             if (targetUser == null)
                 return BadRequest(new Error("User does not exist"));
 
-            UserXUser followRecord = targetUser.Followers
-                .SingleOrDefault(uxu => uxu.FollowerId == ctxUser.ID);
+            FollowRecord followRecord = targetUser.Followers
+                .SingleOrDefault(fr => fr.FollowerId == ctxUser.ID);
 
             if (followRecord == null)
                 return Ok();
