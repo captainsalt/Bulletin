@@ -31,16 +31,16 @@ namespace Bulliten.API.Controllers
         [HttpGet("feed")]
         public async Task<IActionResult> GetUserFeed(string username)
         {
-            var ctxUser = GetAccountFromContext();
+            var user = await _context.UserAccounts.SingleAsync(u => u.Username == username);
 
             var following = await _context.FollowerTable
-                .Where(fr => fr.FollowerId == ctxUser.ID)
+                .Where(fr => fr.FollowerId == user.ID)
                 .Select(fr => fr.FolloweeId)
                 .ToListAsync();
 
             var posts = _context.Posts.Include(p => p.Author);
 
-            var userPosts = await posts.Where(p => p.Author.ID == ctxUser.ID).ToListAsync();
+            var userPosts = await posts.Where(p => p.Author.ID == user.ID).ToListAsync();
             var followingPosts = await posts.Where(p => following.Contains(p.Author.ID)).ToListAsync();
 
             var orderedPosts = userPosts.Concat(followingPosts).OrderByDescending(p => p.CreationDate);
