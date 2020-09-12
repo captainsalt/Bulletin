@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import Vue, { PropType } from "vue";
 import PostElement from "@/components/Post.vue";
 
 export default Vue.extend({
@@ -18,7 +18,7 @@ export default Vue.extend({
   },
   props: {
     posts: {
-      type: Array,
+      type: Array as PropType<Post[]>,
       required: true
     }
   }
