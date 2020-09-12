@@ -113,7 +113,7 @@ export async function followUser(username: string): Promise<void> {
     throw Error((await response.json()).message);
 }
 
-export async function getFollowInfo(username: string): Promise<{ followers: number; following: number }> {
+export async function getFollowInfo(username: string): Promise<{ followers: UserAccount[]; following: UserAccount[] }> {
   const response = await fetch(`${baseUrl}/api/user/followinfo?username=${username}`, {
     method: "GET",
     mode: "cors",

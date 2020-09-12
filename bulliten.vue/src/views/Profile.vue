@@ -14,8 +14,8 @@
           </v-btn>
         </v-card-actions>
 
-        <v-card-text>Followers: {{ followers }} </v-card-text>
-        <v-card-text>Following: {{ following }} </v-card-text>
+        <v-card-text>Followers: {{ followers.length }} </v-card-text>
+        <v-card-text>Following: {{ following.length }} </v-card-text>
       </v-card>
     </v-container>
 
@@ -45,13 +45,15 @@ export default Vue.extend({
     profileUser: {} as UserAccount,
     posts: [] as Array<Post>,
     errorMsg: "",
-    followers: 0,
-    following: 0
+    followers: [] as Array<UserAccount>,
+    following: [] as Array<UserAccount>
   }),
   computed: {
-    ...mapState("auth", ["user"]),
+    ...mapState("auth", {
+      authUser: "user"
+    }),
     isOwnProfile() {
-      return this.user.username === this.username;
+      return this.authUser.username === this.username;
     }
   },
   async beforeMount() {
