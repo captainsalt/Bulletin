@@ -3,6 +3,8 @@
     class="mx-auto"
     max-width="500"
     outlined
+    tile
+    style="margin: -1px"
   >
     <v-list-item>
       <v-list-item-content>
