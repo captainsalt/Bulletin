@@ -63,8 +63,8 @@ export function createPost(content: string): Promise<Response> {
   });
 }
 
-export async function getPosts(): Promise<Post[]> {
-  const response = await fetch(`${baseUrl}/api/post`, {
+export async function getUserFeed(username: string): Promise<Post[]> {
+  const response = await fetch(`${baseUrl}/api/post/feed?username=${username}`, {
     method: "GET",
     mode: "cors",
     headers: getAuthHeader()

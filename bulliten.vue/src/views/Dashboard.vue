@@ -18,7 +18,8 @@
 import Vue from "vue";
 import CreatePostForm from "@/components/CreatePostForm.vue";
 import BullitenBoard from "@/components/BullitenBoard.vue";
-import { getPosts } from "@/services/api-interface";
+import { getUserFeed } from "@/services/api-interface";
+import { mapState } from "vuex";
 
 export default Vue.extend({
   components: {
@@ -28,8 +29,13 @@ export default Vue.extend({
   data: () => ({
     posts: [] as Array<Post>
   }),
+  computed: {
+    ...mapState("auth", [
+      "user"
+    ])
+  },
   async beforeMount() {
-    this.posts = await getPosts();
+    this.posts = await getUserFeed(this.user.username);
   }
 });
 </script>
