@@ -63,8 +63,21 @@ export function createPost(content: string): Promise<Response> {
   });
 }
 
-export async function getUserFeed(username: string): Promise<Post[]> {
-  const response = await fetch(`${baseUrl}/api/post/feed?username=${username}`, {
+export async function getPublicFeed(username: string): Promise<Post[]> {
+  const response = await fetch(`${baseUrl}/api/post/feed/public?username=${username}`, {
+    method: "GET",
+    mode: "cors",
+    headers: getAuthHeader()
+  });
+
+  if (!response.ok)
+    throw Error(await getErrorMesssage(response));
+
+  return (await response.json()).posts;
+}
+
+export async function getPersonalFeed(): Promise<Post[]> {
+  const response = await fetch(`${baseUrl}/api/post/feed/personal`, {
     method: "GET",
     mode: "cors",
     headers: getAuthHeader()
