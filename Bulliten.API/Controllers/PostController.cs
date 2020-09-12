@@ -27,11 +27,23 @@ namespace Bulliten.API.Controllers
             _context = context;
         }
 
-        // GET: api/<PostController>
-        [HttpGet("feed")]
-        public async Task<IActionResult> GetUserFeed(string username)
+        [HttpGet("feed/public")]
+        public async Task<IActionResult> GetPublicFeedAsync([FromQuery] string username)
         {
-            var user = await _context.UserAccounts.SingleAsync(u => u.Username == username);
+            var user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+                return BadRequest(new Error("User does not exist"));
+
+            var posts = await _context.Posts.Include(p => p.Author).Where(p => p.Author.ID == user.ID).ToListAsync();
+
+            return Ok(new { posts });
+        }
+
+        [HttpGet("feed/personal")]
+        public async Task<IActionResult> GetPersonalFeedAsync()
+        {
+            var user = GetAccountFromContext();
 
             var following = await _context.FollowerTable
                 .Where(fr => fr.FollowerId == user.ID)
@@ -43,7 +55,10 @@ namespace Bulliten.API.Controllers
             var userPosts = await posts.Where(p => p.Author.ID == user.ID).ToListAsync();
             var followingPosts = await posts.Where(p => following.Contains(p.Author.ID)).ToListAsync();
 
-            var orderedPosts = userPosts.Concat(followingPosts).OrderByDescending(p => p.CreationDate);
+            var orderedPosts = userPosts
+                .Concat(followingPosts)
+                .OrderByDescending(p => p.CreationDate)
+                .ToList();
 
             return Ok(new { posts = orderedPosts });
         }
@@ -85,6 +100,5 @@ namespace Bulliten.API.Controllers
 
         private UserAccount GetAccountFromContext() =>
             (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
-
     }
 }
