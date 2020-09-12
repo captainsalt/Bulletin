@@ -54,12 +54,20 @@ namespace Bulliten.API.Controllers
                 .Include(u => u.Followers)
                 .SingleOrDefaultAsync(u => u.Username == username);
 
-            var following = await _context.FollowerTable.Where(uxu => uxu.FollowerId == user.ID).CountAsync();
-
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            return Ok(new { followers = user.Followers.Count, following });
+            var followers = await _context.FollowerTable
+                .Where(uxu => uxu.FolloweeId == user.ID)
+                .Select(uxu => uxu.Follower)
+                .ToListAsync();
+
+            var following = await _context.FollowerTable
+                .Where(uxu => uxu.FollowerId == user.ID)
+                .Select(uxu => uxu.Followee)
+                .ToListAsync();
+
+            return Ok(new { following, followers });
         }
 
         [HttpPost("follow")]
