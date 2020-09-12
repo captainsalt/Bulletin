@@ -18,7 +18,7 @@
 import Vue from "vue";
 import CreatePostForm from "@/components/CreatePostForm.vue";
 import BullitenBoard from "@/components/BullitenBoard.vue";
-import { getUserFeed } from "@/services/api-interface";
+import * as api from "@/services/api-interface";
 import { mapState } from "vuex";
 
 export default Vue.extend({
@@ -35,7 +35,7 @@ export default Vue.extend({
     ])
   },
   async beforeMount() {
-    this.posts = await getUserFeed(this.user.username);
+    this.posts = await api.getPersonalFeed();
   }
 });
 </script>

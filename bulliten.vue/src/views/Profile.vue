@@ -18,6 +18,10 @@
         <v-card-text>Following: {{ following }} </v-card-text>
       </v-card>
     </v-container>
+
+    <v-container>
+      <BullitenBoard :posts="posts"/>
+    </v-container>
   </div>
 </template>
 
@@ -25,8 +29,12 @@
 import Vue from "vue";
 import * as api from "@/services/api-interface";
 import { mapState } from "vuex";
+import BullitenBoard from "@/components/BullitenBoard.vue";
 
 export default Vue.extend({
+  components: {
+    BullitenBoard
+  },
   props: {
     username: {
       required: true,
@@ -35,6 +43,7 @@ export default Vue.extend({
   },
   data: () => ({
     profileUser: {} as UserAccount,
+    posts: [] as Array<Post>,
     errorMsg: "",
     followers: 0,
     following: 0
@@ -49,10 +58,12 @@ export default Vue.extend({
     try {
       const user = await api.getUser(this.username);
       const followInfo = await api.getFollowInfo(this.username);
+      const posts = await api.getPublicFeed(this.username);
 
       this.followers = followInfo.followers;
       this.following = followInfo.following;
       this.profileUser = user;
+      this.posts = posts;
     }
     catch (error) {
       this.errorMsg = error.message;
