@@ -35,40 +35,35 @@ namespace Bulliten.API.Controllers
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            List<Post> posts = await _context.Posts.Include(p => p.Author).Where(p => p.Author.ID == user.ID).ToListAsync();
+            IEnumerable<Post> posts = _context.Posts.Include(p => p.Author);
 
             return Ok(new { posts });
         }
 
         [HttpGet("feed/personal")]
-        public async Task<IActionResult> GetPersonalFeedAsync()
+        public IActionResult GetPersonalFeed()
         {
             UserAccount user = GetAccountFromContext();
 
-            List<int> following = await _context.FollowerTable
+            IEnumerable<int> following = _context.FollowerTable
                 .Where(fr => fr.FollowerId == user.ID)
-                .Select(fr => fr.FolloweeId)
-                .ToListAsync();
+                .Select(fr => fr.FolloweeId);
 
-            Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Post, UserAccount> posts = _context.Posts.Include(p => p.Author);
+            IEnumerable<Post> posts = _context.Posts.Include(p => p.Author);
 
-            List<Post> userPosts = await posts.Where(p => p.Author.ID == user.ID).ToListAsync();
-            List<Post> followingPosts = await posts.Where(p => following.Contains(p.Author.ID)).ToListAsync();
+            IEnumerable<Post> userPosts = posts.Where(p => p.Author.ID == user.ID);
+            IEnumerable<Post> followingPosts = posts.Where(p => following.Contains(p.Author.ID));
 
-            List<Post> orderedPosts = userPosts
+            IEnumerable<Post> orderedPosts = userPosts
                 .Concat(followingPosts)
-                .OrderByDescending(p => p.CreationDate)
-                .ToList();
+                .OrderByDescending(p => p.CreationDate);
 
             return Ok(new { posts = orderedPosts });
         }
 
         // GET api/<PostController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+        public string Get(int id) => "value";
 
         // POST api/<PostController>
         [HttpPost("create")]
@@ -98,9 +93,6 @@ namespace Bulliten.API.Controllers
         {
         }
 
-        private UserAccount GetAccountFromContext()
-        {
-            return (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
-        }
+        private UserAccount GetAccountFromContext() => (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
     }
 }
