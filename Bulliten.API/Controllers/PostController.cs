@@ -25,13 +25,22 @@ namespace Bulliten.API.Controllers
         }
 
         // GET: api/<PostController>
-        [HttpGet]
-        public IActionResult GetPosts()
+        [HttpGet("feed")]
+        public async Task<IActionResult> GetUserFeed(string username)
         {
             var ctxUser = GetAccountFromContext();
-            var posts = _context.Posts.Include(p => p.Author).Where(p => p.Author.ID == ctxUser.ID);
 
-            return Ok(new { posts });
+            var following = await _context.FollowerTable
+                .Where(fr => fr.FolloweeId == ctxUser.ID)
+                .Select(fr => fr.FollowerId)
+                .ToListAsync();
+
+            var posts = _context.Posts.Include(p => p.Author);
+
+            var userPosts = await posts.Where(p => p.Author.ID == ctxUser.ID).ToListAsync();
+            var followingPosts = await posts.Where(p => following.Contains(p.Author.ID)).ToListAsync();
+
+            return Ok(new { posts = userPosts.Concat(followingPosts).OrderBy(p => p.CreationDate) });
         }
 
         // GET api/<PostController>/5
