@@ -24,7 +24,8 @@ namespace Bulliten.API.Services
 
         public async Task<AuthenticationResponse> Authenticate(AuthenticationRequest model)
         {
-            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == model.Password);
+            UserAccount user = await _context.UserAccounts
+                .SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == model.Password);
 
             // return null if user not found
             if (user == null) return null;

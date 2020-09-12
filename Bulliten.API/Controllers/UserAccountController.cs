@@ -19,7 +19,10 @@ namespace Bulliten.API.Controllers
         private readonly BullitenDBContext _context;
         private readonly IAuthenticationService _authService;
 
-        public UserAccountController(ILogger<UserAccountController> logger, BullitenDBContext context, IAuthenticationService accountService)
+        public UserAccountController(
+            BullitenDBContext context, 
+            ILogger<UserAccountController> logger, 
+            IAuthenticationService accountService)
         {
             _logger = logger;
             _context = context;
@@ -35,7 +38,8 @@ namespace Bulliten.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserByUsername([FromQuery] string username)
         {
-            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
+            UserAccount user = await _context.UserAccounts
+                .SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
@@ -54,7 +58,9 @@ namespace Bulliten.API.Controllers
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            IEnumerable<UserAccount> followers = _context.FollowerTable.Where(fr => fr.FolloweeId == user.ID).Select(fr => fr.Follower);
+            IEnumerable<UserAccount> followers = _context.FollowerTable
+                .Where(fr => fr.FolloweeId == user.ID)
+                .Select(fr => fr.Follower);
 
             IEnumerable<UserAccount> following = _context.FollowerTable
                 .Where(fr => fr.FollowerId == user.ID)
@@ -135,7 +141,12 @@ namespace Bulliten.API.Controllers
             await _context.UserAccounts.AddAsync(formAccount);
             await _context.SaveChangesAsync();
 
-            AuthenticationResponse auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
+            AuthenticationResponse auth = await _authService
+                .Authenticate(new AuthenticationRequest
+                {
+                    Username = formAccount.Username,
+                    Password = formAccount.Password
+                });
 
             return StatusCode(201, new { token = auth.Token, user = formAccount });
         }
@@ -143,12 +154,19 @@ namespace Bulliten.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] UserAccount formAccount)
         {
-            UserAccount matchedAccount = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
+            UserAccount matchedAccount = await _context.UserAccounts
+                .SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
 
             if (matchedAccount == null)
                 return BadRequest(new Error("Invalid username or password"));
 
-            AuthenticationResponse auth = await _authService.Authenticate(new AuthenticationRequest { Username = matchedAccount.Username, Password = matchedAccount.Password });
+            AuthenticationResponse auth = await _authService
+                .Authenticate(new AuthenticationRequest
+                {
+                    Username = matchedAccount.Username,
+                    Password = matchedAccount.Password
+                });
+
             return Ok(new { token = auth.Token, user = matchedAccount });
         }
 
