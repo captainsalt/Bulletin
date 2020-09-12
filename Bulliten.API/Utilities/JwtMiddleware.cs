@@ -1,13 +1,10 @@
-﻿using Bulliten.API.Services;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,7 +30,7 @@ namespace Bulliten.API.Utilities
 
         public async Task Invoke(HttpContext context)
         {
-            var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            string token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
                 await AttachUserToContext(context, token);
@@ -45,8 +42,8 @@ namespace Bulliten.API.Utilities
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Secret"]);
+                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                byte[] key = Encoding.ASCII.GetBytes(_configuration["Secret"]);
 
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
@@ -58,8 +55,8 @@ namespace Bulliten.API.Utilities
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
 
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
+                JwtSecurityToken jwtToken = (JwtSecurityToken)validatedToken;
+                int userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
 
                 // attach user to context on successful jwt validation
                 context.Items[CONTEXT_USER] = await _context.UserAccounts.FirstOrDefaultAsync(u => u.ID == userId);

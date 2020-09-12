@@ -4,9 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,13 +24,13 @@ namespace Bulliten.API.Services
 
         public async Task<AuthenticationResponse> Authenticate(AuthenticationRequest model)
         {
-            var user = await _context.UserAccounts.SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == model.Password);
+            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == model.Password);
 
             // return null if user not found
             if (user == null) return null;
 
             // authentication successful so generate jwt token
-            var token = GenerateJwtToken(user);
+            string token = GenerateJwtToken(user);
 
             return new AuthenticationResponse(user, token);
         }
@@ -40,10 +38,10 @@ namespace Bulliten.API.Services
         private string GenerateJwtToken(UserAccount user)
         {
             // generate token that is valid for 7 days
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_config["Secret"]);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            byte[] key = Encoding.ASCII.GetBytes(_config["Secret"]);
 
-            var tokenDescriptor = new SecurityTokenDescriptor
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
@@ -53,7 +51,7 @@ namespace Bulliten.API.Services
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
 

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bulliten.API.Models;
+﻿using Bulliten.API.Models;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -30,12 +30,12 @@ namespace Bulliten.API.Controllers
         [HttpGet("feed/public")]
         public async Task<IActionResult> GetPublicFeedAsync([FromQuery] string username)
         {
-            var user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
+            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            var posts = await _context.Posts.Include(p => p.Author).Where(p => p.Author.ID == user.ID).ToListAsync();
+            List<Post> posts = await _context.Posts.Include(p => p.Author).Where(p => p.Author.ID == user.ID).ToListAsync();
 
             return Ok(new { posts });
         }
@@ -43,19 +43,19 @@ namespace Bulliten.API.Controllers
         [HttpGet("feed/personal")]
         public async Task<IActionResult> GetPersonalFeedAsync()
         {
-            var user = GetAccountFromContext();
+            UserAccount user = GetAccountFromContext();
 
-            var following = await _context.FollowerTable
+            List<int> following = await _context.FollowerTable
                 .Where(uxu => uxu.FollowerId == user.ID)
                 .Select(fr => fr.FolloweeId)
                 .ToListAsync();
 
-            var posts = _context.Posts.Include(p => p.Author);
+            Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Post, UserAccount> posts = _context.Posts.Include(p => p.Author);
 
-            var userPosts = await posts.Where(p => p.Author.ID == user.ID).ToListAsync();
-            var followingPosts = await posts.Where(p => following.Contains(p.Author.ID)).ToListAsync();
+            List<Post> userPosts = await posts.Where(p => p.Author.ID == user.ID).ToListAsync();
+            List<Post> followingPosts = await posts.Where(p => following.Contains(p.Author.ID)).ToListAsync();
 
-            var orderedPosts = userPosts
+            List<Post> orderedPosts = userPosts
                 .Concat(followingPosts)
                 .OrderByDescending(p => p.CreationDate)
                 .ToList();
@@ -74,8 +74,8 @@ namespace Bulliten.API.Controllers
         [HttpPost("create")]
         public async Task CreatePost([FromForm] Post formPost)
         {
-            var ctxUser = GetAccountFromContext();
-            var dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == ctxUser.ID);
+            UserAccount ctxUser = GetAccountFromContext();
+            UserAccount dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == ctxUser.ID);
 
             formPost.Author = ctxUser;
             formPost.CreationDate = DateTime.Now;
@@ -98,7 +98,9 @@ namespace Bulliten.API.Controllers
         {
         }
 
-        private UserAccount GetAccountFromContext() =>
-            (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+        private UserAccount GetAccountFromContext()
+        {
+            return (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+        }
     }
 }

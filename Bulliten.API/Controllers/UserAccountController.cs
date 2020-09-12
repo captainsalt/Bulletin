@@ -3,13 +3,10 @@ using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Controllers
@@ -38,7 +35,7 @@ namespace Bulliten.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserByUsername([FromQuery] string username)
         {
-            var user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
+            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
@@ -50,19 +47,19 @@ namespace Bulliten.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetUserFollowings([FromQuery] string username)
         {
-            var user = await _context.UserAccounts
+            UserAccount user = await _context.UserAccounts
                 .Include(u => u.Followers)
                 .SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            var followers = await _context.FollowerTable
+            List<UserAccount> followers = await _context.FollowerTable
                 .Where(uxu => uxu.FolloweeId == user.ID)
                 .Select(uxu => uxu.Follower)
                 .ToListAsync();
 
-            var following = await _context.FollowerTable
+            List<UserAccount> following = await _context.FollowerTable
                 .Where(uxu => uxu.FollowerId == user.ID)
                 .Select(uxu => uxu.Followee)
                 .ToListAsync();
@@ -74,19 +71,19 @@ namespace Bulliten.API.Controllers
         [Authorize]
         public async Task<IActionResult> FollowUser([FromQuery] string username)
         {
-            var ctxUser = GetAccountFromContext();
+            UserAccount ctxUser = GetAccountFromContext();
 
             if (ctxUser.Username == username)
                 return BadRequest(new Error("Cannot follow yourself"));
 
-            var targetUser = await _context.UserAccounts
+            UserAccount targetUser = await _context.UserAccounts
                .Include(u => u.Followers)
                .SingleOrDefaultAsync(u => u.Username == username);
 
             if (targetUser == null)
                 return BadRequest(new Error("User does not exist"));
 
-            var followRecord = targetUser.Followers
+            UserXUser followRecord = targetUser.Followers
                 .SingleOrDefault(uxu => uxu.FollowerId == ctxUser.ID);
 
             if (followRecord != null)
@@ -107,19 +104,19 @@ namespace Bulliten.API.Controllers
         [Authorize]
         public async Task<IActionResult> UnfollowUser([FromQuery] string username)
         {
-            var ctxUser = GetAccountFromContext();
+            UserAccount ctxUser = GetAccountFromContext();
 
             if (ctxUser.Username == username)
                 return BadRequest(new Error("Cannot unfollow yourself"));
 
-            var targetUser = await _context.UserAccounts
+            UserAccount targetUser = await _context.UserAccounts
                .Include(u => u.Followers)
                .SingleOrDefaultAsync(u => u.Username == username);
 
             if (targetUser == null)
                 return BadRequest(new Error("User does not exist"));
 
-            var followRecord = targetUser.Followers
+            UserXUser followRecord = targetUser.Followers
                 .SingleOrDefault(uxu => uxu.FollowerId == ctxUser.ID);
 
             if (followRecord == null)
@@ -134,7 +131,7 @@ namespace Bulliten.API.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccount([FromForm] UserAccount formAccount)
         {
-            var isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
+            bool isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
 
             if (isInvalidUsername)
                 return BadRequest(new Error($"Username \"{formAccount.Username}\" is already in use"));
@@ -142,7 +139,7 @@ namespace Bulliten.API.Controllers
             await _context.UserAccounts.AddAsync(formAccount);
             await _context.SaveChangesAsync();
 
-            var auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
+            AuthenticationResponse auth = await _authService.Authenticate(new AuthenticationRequest { Username = formAccount.Username, Password = formAccount.Password });
 
             return StatusCode(201, new { token = auth.Token, user = formAccount });
         }
@@ -150,16 +147,18 @@ namespace Bulliten.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] UserAccount formAccount)
         {
-            var matchedAccount = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
+            UserAccount matchedAccount = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
 
             if (matchedAccount == null)
                 return BadRequest(new Error("Invalid username or password"));
 
-            var auth = await _authService.Authenticate(new AuthenticationRequest { Username = matchedAccount.Username, Password = matchedAccount.Password });
+            AuthenticationResponse auth = await _authService.Authenticate(new AuthenticationRequest { Username = matchedAccount.Username, Password = matchedAccount.Password });
             return Ok(new { token = auth.Token, user = matchedAccount });
         }
 
-        private UserAccount GetAccountFromContext() =>
-           (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+        private UserAccount GetAccountFromContext()
+        {
+            return (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+        }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Bulliten.API.Models.Authentication
+﻿namespace Bulliten.API.Models.Authentication
 {
     public class AuthenticationRequest
     {

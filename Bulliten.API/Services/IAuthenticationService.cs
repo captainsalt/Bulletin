@@ -1,8 +1,4 @@
-﻿using Bulliten.API.Models;
-using Bulliten.API.Models.Authentication;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Bulliten.API.Models.Authentication;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Services
