@@ -21,7 +21,7 @@ export async function createAccount(username: string, password: string): Promise
   form.append("username", username);
   form.append("password", password);
 
-  const response = await fetch(`${baseUrl}/api/user/create`, {
+  const response = await fetch(`${baseUrl}/user/create`, {
     method: "POST",
     mode: "cors",
     body: form
@@ -38,7 +38,7 @@ export async function login(username: string, password: string): Promise<AuthRes
   form.append("username", username);
   form.append("password", password);
 
-  const response = await fetch(`${baseUrl}/api/user/login`, {
+  const response = await fetch(`${baseUrl}/user/login`, {
     method: "POST",
     mode: "cors",
     body: form
@@ -55,7 +55,7 @@ export function createPost(content: string): Promise<Response> {
 
   form.append("content", content);
 
-  return fetch(`${baseUrl}/api/post/create`, {
+  return fetch(`${baseUrl}/post/create`, {
     method: "POST",
     mode: "cors",
     body: form,
@@ -64,7 +64,7 @@ export function createPost(content: string): Promise<Response> {
 }
 
 export async function getPublicFeed(username: string): Promise<Post[]> {
-  const response = await fetch(`${baseUrl}/api/post/feed/public?username=${username}`, {
+  const response = await fetch(`${baseUrl}/post/feed/public?username=${username}`, {
     method: "GET",
     mode: "cors",
     headers: getAuthHeader()
@@ -77,7 +77,7 @@ export async function getPublicFeed(username: string): Promise<Post[]> {
 }
 
 export async function getPersonalFeed(): Promise<Post[]> {
-  const response = await fetch(`${baseUrl}/api/post/feed/personal`, {
+  const response = await fetch(`${baseUrl}/post/feed/personal`, {
     method: "GET",
     mode: "cors",
     headers: getAuthHeader()
@@ -90,7 +90,7 @@ export async function getPersonalFeed(): Promise<Post[]> {
 }
 
 export async function getUser(username: string): Promise<UserAccount> {
-  const response = await fetch(`${baseUrl}/api/user?username=${username}`, {
+  const response = await fetch(`${baseUrl}/user?username=${username}`, {
     method: "GET",
     mode: "cors",
     headers: getAuthHeader()
@@ -103,7 +103,7 @@ export async function getUser(username: string): Promise<UserAccount> {
 }
 
 export async function followUser(username: string): Promise<void> {
-  const response = await fetch(`${baseUrl}/api/user/follow?username=${username}`, {
+  const response = await fetch(`${baseUrl}/user/follow?username=${username}`, {
     method: "POST",
     mode: "cors",
     headers: getAuthHeader()
@@ -114,7 +114,7 @@ export async function followUser(username: string): Promise<void> {
 }
 
 export async function unfollowUser(username: string): Promise<void> {
-  const response = await fetch(`${baseUrl}/api/user/unfollow?username=${username}`, {
+  const response = await fetch(`${baseUrl}/user/unfollow?username=${username}`, {
     method: "POST",
     mode: "cors",
     headers: getAuthHeader()
@@ -125,7 +125,7 @@ export async function unfollowUser(username: string): Promise<void> {
 }
 
 export async function getFollowInfo(username: string): Promise<{ followers: UserAccount[]; following: UserAccount[] }> {
-  const response = await fetch(`${baseUrl}/api/user/followinfo?username=${username}`, {
+  const response = await fetch(`${baseUrl}/user/followinfo?username=${username}`, {
     method: "GET",
     mode: "cors",
     headers: getAuthHeader()
