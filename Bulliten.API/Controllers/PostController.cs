@@ -28,14 +28,14 @@ namespace Bulliten.API.Controllers
         }
 
         [HttpGet("feed/public")]
-        public async Task<IActionResult> GetPublicFeedAsync([FromQuery] string username)
+        public async Task<IActionResult> GetPublicFeed([FromQuery] string username)
         {
             UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            IEnumerable<Post> posts = _context.Posts.Include(p => p.Author);
+            IEnumerable<Post> posts = await _context.Posts.ToListAsync();
 
             return Ok(new { posts });
         }
