@@ -56,13 +56,15 @@ namespace Bulliten.API.Controllers
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            IEnumerable<UserAccount> followers = _context.FollowerTable
+            IEnumerable<UserAccount> followers = await _context.FollowerTable
                 .Where(fr => fr.FolloweeId == user.ID)
-                .Select(fr => fr.Follower);
+                .Select(fr => fr.Follower)
+                .ToListAsync();
 
-            IEnumerable<UserAccount> following = _context.FollowerTable
+            IEnumerable<UserAccount> following = await _context.FollowerTable
                 .Where(fr => fr.FollowerId == user.ID)
-                .Select(fr => fr.Followee);
+                .Select(fr => fr.Followee)
+                .ToListAsync();
 
             return Ok(new { following, followers });
         }

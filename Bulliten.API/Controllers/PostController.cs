@@ -68,7 +68,7 @@ namespace Bulliten.API.Controllers
             return await ActOnPost(postId, (post, user) =>
             {
                 if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
-                    return BadRequest("Cannot like a post you alredy liked");
+                    return BadRequest("Cannot like a post you already liked");
 
                 user.LikedPosts.Add(new UserLike { Post = post, User = user });
                 return Ok();
