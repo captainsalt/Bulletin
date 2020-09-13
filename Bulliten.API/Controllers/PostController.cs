@@ -62,11 +62,29 @@ namespace Bulliten.API.Controllers
             return Ok(new { posts = orderedPosts });
         }
 
-        // GET api/<PostController>/5
-        [HttpGet("{id}")]
-        public string Get(int id) => "value";
+        [HttpPost("like")]
+        public async Task<IActionResult> LikePost(int postId)
+        {
+            return await ActOnPost(postId, (post, user) =>
+            {
+                if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
+                    return BadRequest("Cannot like a post you alredy liked");
 
-        // POST api/<PostController>
+                user.LikedPosts.Add(new UserLike { Post = post, User = user });
+                return Ok();
+            });
+        }
+
+        [HttpPost("unlike")]
+        public async Task<IActionResult> UnlikePost(int postId)
+        {
+            return await ActOnPost(postId, (post, user) =>
+            {
+                user.LikedPosts.Remove(new UserLike { Post = post, User = user });
+                return Ok();
+            });
+        }
+
         [HttpPost("create")]
         public async Task CreatePost([FromForm] Post formPost)
         {
@@ -94,6 +112,23 @@ namespace Bulliten.API.Controllers
         {
         }
 
-        private UserAccount GetAccountFromContext() => (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+        private UserAccount GetAccountFromContext() =>
+            (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+
+        private async Task<IActionResult> ActOnPost(int postId, Func<Post, UserAccount, IActionResult> funcDelegate)
+        {
+            UserAccount user = await _context.UserAccounts
+                .Include(u => u.LikedPosts)
+                .SingleOrDefaultAsync(u => u.ID == GetAccountFromContext().ID);
+
+            Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
+
+            if (post == null) return BadRequest("Post with provided ID does not exist");
+
+            IActionResult result = funcDelegate(post, user);
+            await _context.SaveChangesAsync();
+
+            return result;
+        }
     }
 }
