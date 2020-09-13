@@ -41,18 +41,19 @@ namespace Bulliten.API.Controllers
         }
 
         [HttpGet("feed/personal")]
-        public IActionResult GetPersonalFeed()
+        public async Task<IActionResult> GetPersonalFeed()
         {
             UserAccount user = GetAccountFromContext();
 
-            IEnumerable<int> following = _context.FollowerTable
+            IEnumerable<int> following = await _context.FollowerTable
                 .Where(fr => fr.FollowerId == user.ID)
-                .Select(fr => fr.FolloweeId);
+                .Select(fr => fr.FolloweeId)
+                .ToListAsync();
 
-            IEnumerable<Post> posts = _context.Posts.Include(p => p.Author);
+            IEnumerable<Post> posts = await _context.Posts.Include(p => p.Author).ToListAsync();
 
-            IEnumerable<Post> userPosts = posts.Where(p => p.Author.ID == user.ID);
-            IEnumerable<Post> followingPosts = posts.Where(p => following.Contains(p.Author.ID));
+            IEnumerable<Post> userPosts = posts.Where(p => p.Author.ID == user.ID).ToList();
+            IEnumerable<Post> followingPosts = posts.Where(p => following.Contains(p.Author.ID)).ToList();
 
             IEnumerable<Post> orderedPosts = userPosts
                 .Concat(followingPosts)
