@@ -16,6 +16,8 @@ namespace Bulliten.API
 
         public DbSet<FollowRecord> FollowerTable { get; set; }
 
+        public DbSet<UserLike> UserLike { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FollowRecord>()
@@ -25,6 +27,13 @@ namespace Bulliten.API
                 .HasOne(user => user.Followee)
                 .WithMany(user => user.Followers)
                 .HasForeignKey(user => user.FolloweeId);
+
+            modelBuilder.Entity<UserLike>()
+                .HasKey(ul => new { ul.UserId, ul.PostId });
+
+            modelBuilder.Entity<UserLike>()
+                .HasOne(userLike => userLike.Post)
+                .WithMany(post => post.LikedBy);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
