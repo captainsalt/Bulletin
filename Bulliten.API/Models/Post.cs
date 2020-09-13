@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
@@ -18,6 +19,7 @@ namespace Bulliten.API.Models
 
         public string Content { get; set; }
 
+        [JsonIgnore]
         public ICollection<UserLike> LikedBy { get; set; } = new List<UserLike>();
     }
 }

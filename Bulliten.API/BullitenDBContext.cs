@@ -1,12 +1,16 @@
 ﻿using Bulliten.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Bulliten.API
 {
     public class BullitenDBContext : DbContext
     {
-        public BullitenDBContext()
+        private readonly IConfiguration _config;
+
+        public BullitenDBContext(IConfiguration config)
         {
+            _config = config;
             Database.EnsureCreated();
         }
 
@@ -30,13 +34,9 @@ namespace Bulliten.API
 
             modelBuilder.Entity<UserLike>()
                 .HasKey(ul => new { ul.UserId, ul.PostId });
-
-            modelBuilder.Entity<UserLike>()
-                .HasOne(userLike => userLike.Post)
-                .WithMany(post => post.LikedBy);
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-            optionsBuilder.UseSqlite("Filename=Bulliten.db");
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => 
+            optionsBuilder.UseNpgsql(_config.GetConnectionString("postgres"));
     }
 }
