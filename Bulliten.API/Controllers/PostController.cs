@@ -35,7 +35,12 @@ namespace Bulliten.API.Controllers
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            IEnumerable<Post> posts = await _context.Posts.ToListAsync();
+            IEnumerable<Post> posts = await _context.Posts
+                .AsNoTracking()
+                .Include(p => p.Author)
+                .Include(p => p.LikedBy)
+                .Include(p => p.RepostedBy)
+                .ToListAsync();
 
             return Ok(new { posts });
         }
@@ -46,15 +51,19 @@ namespace Bulliten.API.Controllers
             UserAccount user = GetAccountFromContext();
 
             IEnumerable<Post> posts = await _context.Posts
+                .AsNoTracking()
                 .Include(p => p.Author)
+                .Include(p => p.LikedBy)
+                .Include(p => p.RepostedBy)
                 .ToListAsync();
 
             IEnumerable<Post> userPosts = posts.Where(p => p.Author.ID == user.ID).ToList();
 
             IEnumerable<int> userFollowingIds = await _context.FollowerTable
-              .Where(fr => fr.FollowerId == user.ID)
-              .Select(fr => fr.FolloweeId)
-              .ToListAsync();
+                .AsNoTracking()
+                .Where(fr => fr.FollowerId == user.ID)
+                .Select(fr => fr.FolloweeId)
+                .ToListAsync();
 
             IEnumerable<Post> followedUsersPosts = posts.Where(p => userFollowingIds.Contains(p.Author.ID)).ToList();
 
