@@ -10,6 +10,9 @@ declare interface Post {
   content: string;
   creationDate: string;
   likes: number;
+  likeStatus: boolean;
+  rePosts: number;
+  rePostStatus: boolean;
 }
 
 declare interface AuthResponse {

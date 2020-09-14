@@ -125,6 +125,33 @@ export async function likePost(postId: number): Promise<void> {
     throw Error((await response.json()).message);
 }
 
+export async function unlikePost(postId: number): Promise<void> {
+  const response = await fetchRequest("POST", `/post/unlike?postId=${postId}`, {
+    headers: getAuthHeader()
+  });
+
+  if (!response.ok)
+    throw Error((await response.json()).message);
+}
+
+export async function repost(postId: number): Promise<void> {
+  const response = await fetchRequest("POST", `/post/repost?postId=${postId}`, {
+    headers: getAuthHeader()
+  });
+
+  if (!response.ok)
+    throw Error((await response.json()).message);
+}
+
+export async function unRepost(postId: number): Promise<void> {
+  const response = await fetchRequest("POST", `/post/unrepost?postId=${postId}`, {
+    headers: getAuthHeader()
+  });
+
+  if (!response.ok)
+    throw Error((await response.json()).message);
+}
+
 export async function getFollowInfo(username: string): Promise<{ followers: UserAccount[]; following: UserAccount[] }> {
   const response = await fetchRequest("GET", `/user/followinfo?username=${username}`, {
     headers: getAuthHeader()
