@@ -181,19 +181,17 @@ namespace Bulliten.API.Controllers
             IEnumerable<string> includeProps,
             Func<Post, UserAccount, IActionResult> funcDelegate)
         {
-            DbSet<UserAccount> databaseQuery = _context.UserAccounts;
-
-            foreach (string propName in includeProps)
-                databaseQuery.Include(propName);
-
-            UserAccount user = await databaseQuery.SingleOrDefaultAsync(u => u.ID == GetAccountFromContext().ID);
-
             Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
 
-            if (post == null)
-                return BadRequest("Post with provided ID does not exist");
+            if (post == null) return BadRequest("Post with provided ID does not exist");
+
+            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.ID == GetAccountFromContext().ID);
+
+            foreach (string propName in includeProps)
+                await _context.Entry(user).Collection(propName).LoadAsync();
 
             IActionResult result = funcDelegate(post, user);
+
             await _context.SaveChangesAsync();
 
             return result;
