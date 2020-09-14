@@ -45,18 +45,21 @@ namespace Bulliten.API.Controllers
         {
             UserAccount user = GetAccountFromContext();
 
-            IEnumerable<int> following = await _context.FollowerTable
-                .Where(fr => fr.FollowerId == user.ID)
-                .Select(fr => fr.FolloweeId)
+            IEnumerable<Post> posts = await _context.Posts
+                .Include(p => p.Author)
                 .ToListAsync();
 
-            IEnumerable<Post> posts = await _context.Posts.Include(p => p.Author).ToListAsync();
-
             IEnumerable<Post> userPosts = posts.Where(p => p.Author.ID == user.ID).ToList();
-            IEnumerable<Post> followingPosts = posts.Where(p => following.Contains(p.Author.ID)).ToList();
+
+            IEnumerable<int> userFollowingIds = await _context.FollowerTable
+              .Where(fr => fr.FollowerId == user.ID)
+              .Select(fr => fr.FolloweeId)
+              .ToListAsync();
+
+            IEnumerable<Post> followedUsersPosts = posts.Where(p => userFollowingIds.Contains(p.Author.ID)).ToList();
 
             IEnumerable<Post> orderedPosts = userPosts
-                .Concat(followingPosts)
+                .Concat(followedUsersPosts)
                 .OrderByDescending(p => p.CreationDate);
 
             return Ok(new { posts = orderedPosts });
@@ -71,6 +74,8 @@ namespace Bulliten.API.Controllers
                     return BadRequest("Cannot like a post you already liked");
 
                 user.LikedPosts.Add(new UserLike { Post = post, User = user });
+                post.Likes++;
+
                 return Ok();
             });
         }
@@ -80,7 +85,11 @@ namespace Bulliten.API.Controllers
         {
             return await ActOnPost(postId, (post, user) =>
             {
-                user.LikedPosts.Remove(new UserLike { Post = post, User = user });
+                bool likeWasRemoved = user.LikedPosts.Remove(new UserLike { Post = post, User = user });
+
+                if (likeWasRemoved)
+                    post.Likes--;
+
                 return Ok();
             });
         }

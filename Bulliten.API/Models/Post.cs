@@ -19,6 +19,8 @@ namespace Bulliten.API.Models
 
         public string Content { get; set; }
 
+        public int Likes { get; set; }
+
         [JsonIgnore]
         public ICollection<UserLike> LikedBy { get; set; } = new List<UserLike>();
     }
