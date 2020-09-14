@@ -21,7 +21,12 @@ namespace Bulliten.API.Models
 
         public int Likes { get; set; }
 
+        public int RePosts { get; set; }
+
         [JsonIgnore]
         public ICollection<UserLike> LikedBy { get; set; } = new List<UserLike>();
+
+        [JsonIgnore]
+        public ICollection<UserRepost> RepostedBy { get; set; } = new List<UserRepost>();
     }
 }

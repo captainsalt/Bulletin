@@ -26,8 +26,8 @@ namespace Bulliten.API.Models
         [JsonIgnore]
         public ICollection<FollowRecord> Followers { get; set; } = new List<FollowRecord>();
 
-        //[JsonIgnore]
-        //public ICollection<Post> RePosts { get; set; } = new List<Post>();
+        [JsonIgnore]
+        public ICollection<UserRepost> RePosts { get; set; } = new List<UserRepost>();
 
         [JsonIgnore]
         public ICollection<UserLike> LikedPosts { get; set; } = new List<UserLike>();

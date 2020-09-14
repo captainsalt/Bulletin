@@ -22,6 +22,8 @@ namespace Bulliten.API
 
         public DbSet<UserLike> UserLike { get; set; }
 
+        public DbSet<UserRepost> UserReposts { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FollowRecord>()
@@ -34,9 +36,12 @@ namespace Bulliten.API
 
             modelBuilder.Entity<UserLike>()
                 .HasKey(ul => new { ul.UserId, ul.PostId });
+
+            modelBuilder.Entity<UserRepost>()
+                .HasKey(ur => new { ur.UserId, ur.PostId });
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseNpgsql(_config.GetConnectionString("postgres"));
     }
 }
