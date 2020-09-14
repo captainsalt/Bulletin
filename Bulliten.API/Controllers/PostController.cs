@@ -144,13 +144,10 @@ namespace Bulliten.API.Controllers
         [HttpPost("create")]
         public async Task CreatePost([FromForm] Post formPost)
         {
-            UserAccount ctxUser = GetAccountFromContext();
-            UserAccount dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == ctxUser.ID);
-
-            formPost.Author = ctxUser;
-            formPost.CreationDate = DateTime.Now;
+            UserAccount dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == GetAccountFromContext().ID);
 
             dbUser.Posts.Add(formPost);
+
             await _context.SaveChangesAsync();
 
             Ok();
