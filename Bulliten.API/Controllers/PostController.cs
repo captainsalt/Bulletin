@@ -92,7 +92,8 @@ namespace Bulliten.API.Controllers
                 new List<string> { "LikedPosts" },
                 (post, user) =>
                 {
-                    bool likeWasRemoved = user.LikedPosts.Remove(new UserLike { Post = post, User = user });
+                    UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
+                    bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
 
                     if (likeWasRemoved)
                         post.Likes--;
@@ -129,7 +130,8 @@ namespace Bulliten.API.Controllers
                 new List<string> { "RePosts" },
                 (post, user) =>
                 {
-                    bool repostWasRemoved = user.RePosts.Remove(new UserRepost { Post = post, User = user });
+                    UserRepost userRepostToRemove = user.RePosts.SingleOrDefault(ur => ur.PostId == post.ID);
+                    bool repostWasRemoved = user.RePosts.Remove(userRepostToRemove);
 
                     if (repostWasRemoved)
                         post.RePosts--;
