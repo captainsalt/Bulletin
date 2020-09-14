@@ -21,10 +21,14 @@
       <v-btn text>
         Re-Post
       </v-btn>
-      <v-btn text>
+      <v-btn text @click="like">
         Like
       </v-btn>
     </v-card-actions>
+
+    <v-card-text>
+      Likes: {{ post.likes }}
+    </v-card-text>
 
     <v-card-subtitle>
       {{ readableTime(post.creationDate) }}
@@ -34,6 +38,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
+import * as api from "@/services/api-interface";
 
 export default Vue.extend({
   props: {
@@ -46,6 +51,9 @@ export default Vue.extend({
     readableTime(dateString: string): string {
       const date = new Date(dateString);
       return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+    },
+    like() {
+      api.likePost(this.post.id);
     }
   }
 });

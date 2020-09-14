@@ -9,6 +9,7 @@ declare interface Post {
   author: IUserAccount;
   content: string;
   creationDate: string;
+  likes: number;
 }
 
 declare interface AuthResponse {
