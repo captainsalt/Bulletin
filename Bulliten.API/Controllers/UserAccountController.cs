@@ -79,8 +79,8 @@ namespace Bulliten.API.Controllers
                 return BadRequest(new Error("Cannot follow yourself"));
 
             UserAccount targetUser = await _context.UserAccounts
-               .Include(u => u.Followers)
-               .SingleOrDefaultAsync(u => u.Username == username);
+                .Include(u => u.Followers)
+                .SingleOrDefaultAsync(u => u.Username == username);
 
             if (targetUser == null)
                 return BadRequest(new Error("User does not exist"));
@@ -112,8 +112,8 @@ namespace Bulliten.API.Controllers
                 return BadRequest(new Error("Cannot unfollow yourself"));
 
             UserAccount targetUser = await _context.UserAccounts
-               .Include(u => u.Followers)
-               .SingleOrDefaultAsync(u => u.Username == username);
+                .Include(u => u.Followers)
+                .SingleOrDefaultAsync(u => u.Username == username);
 
             if (targetUser == null)
                 return BadRequest(new Error("User does not exist"));
