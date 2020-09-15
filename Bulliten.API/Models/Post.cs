@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class Post : IEntity
+    public class Post : IEntity<Post>
     {
         public Post()
         {
@@ -42,5 +43,9 @@ namespace Bulliten.API.Models
 
         [JsonIgnore]
         public ICollection<UserRepost> RepostedBy { get; set; } = new List<UserRepost>();
+
+        public bool Equals([AllowNull] Post x, [AllowNull] Post y) => x.ID == y.ID;
+
+        public int GetHashCode([DisallowNull] Post obj) => throw new NotImplementedException();
     }
 }

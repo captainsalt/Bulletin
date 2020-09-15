@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class UserAccount : IEntity
+    public class UserAccount : IEntity<UserAccount>
     {
         public UserAccount()
         {
@@ -31,5 +32,9 @@ namespace Bulliten.API.Models
 
         [JsonIgnore]
         public ICollection<UserLike> LikedPosts { get; set; } = new List<UserLike>();
+
+        public bool Equals([AllowNull] UserAccount x, [AllowNull] UserAccount y) => x.ID == y.ID;
+
+        public int GetHashCode([DisallowNull] UserAccount obj) => throw new NotImplementedException();
     }
 }

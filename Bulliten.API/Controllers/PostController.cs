@@ -35,12 +35,27 @@ namespace Bulliten.API.Controllers
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            IEnumerable<Post> posts = await _context.Posts
+            IEnumerable<Post> userPosts = await _context.Posts
                 .AsNoTracking()
                 .Include(p => p.Author)
                 .Include(p => p.LikedBy)
                 .Include(p => p.RepostedBy)
+                .Where(p => p.Author.ID == user.ID)
                 .ToListAsync();
+
+            IEnumerable<Post> reposted = await _context.Posts
+                 .AsNoTracking()
+                 .Include(p => p.Author)
+                 .Include(p => p.LikedBy)
+                 .Include(p => p.RepostedBy)
+                 .Where(p => p.RepostedBy.Any(ur => ur.UserId == user.ID))
+                 .ToListAsync();
+
+            IEnumerable<Post> posts = userPosts
+                .Concat(reposted)
+                .NoDuplicates()
+                .OrderByDescending(p => p.CreationDate)
+                .ToList();
 
             return Ok(new { posts });
         }
@@ -67,8 +82,14 @@ namespace Bulliten.API.Controllers
 
             IEnumerable<Post> followedUsersPosts = posts.Where(p => userFollowingIds.Contains(p.Author.ID)).ToList();
 
+            IEnumerable<Post> reposted = posts
+                .Where(p => p.RepostedBy
+                .Any(ur => ur.UserId == user.ID));
+
             IEnumerable<Post> orderedPosts = userPosts
                 .Concat(followedUsersPosts)
+                .Concat(reposted)
+                .NoDuplicates()
                 .OrderByDescending(p => p.CreationDate);
 
             return Ok(new { posts = orderedPosts });

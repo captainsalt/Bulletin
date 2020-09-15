@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Bulliten.API.Models
 {
-    internal interface IEntity
+    public interface IEntity<T> : IEqualityComparer<T>
     {
+        public int ID { get; set; }
+
         public DateTime CreationDate { get; set; }
     }
 }
