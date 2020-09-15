@@ -80,6 +80,10 @@ namespace Bulliten.API.Controllers
                 .NoDuplicates()
                 .OrderByDescending(p => p.CreationDate);
 
+            orderedPosts
+                .AsParallel()
+                .ForAll(p => p.PopulateStatuses(user));
+
             return Ok(new { posts = orderedPosts });
         }
 
