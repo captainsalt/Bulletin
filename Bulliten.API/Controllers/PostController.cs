@@ -172,18 +172,6 @@ namespace Bulliten.API.Controllers
             Ok();
         }
 
-        // PUT api/<PostController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<PostController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-
         private UserAccount GetAccountFromContext() =>
             (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 
