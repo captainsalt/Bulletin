@@ -3,6 +3,7 @@ using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -35,22 +36,12 @@ namespace Bulliten.API.Controllers
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            IEnumerable<Post> userPosts = await _context.Posts
-                .AsNoTracking()
-                .Include(p => p.Author)
-                .Include(p => p.LikedBy)
-                .Include(p => p.RepostedBy)
-                .Where(p => p.Author.ID == user.ID)
-                .ToListAsync();
+            IEnumerable<Post> userPosts = await QueryPosts(q =>
+                q.Where(p => p.Author.ID == user.ID));
 
-            IEnumerable<Post> reposted = await _context.Posts
-                 .AsNoTracking()
-                 .Include(p => p.Author)
-                 .Include(p => p.LikedBy)
-                 .Include(p => p.RepostedBy)
-                 .Where(p => p.RepostedBy.Any(ur => ur.UserId == user.ID))
-                 .ToListAsync();
-
+            IEnumerable<Post> reposted = await QueryPosts(q =>
+                q.Where(p => p.RepostedBy.Any(ur => ur.UserId == user.ID)));
+                
             IEnumerable<Post> posts = userPosts
                 .Concat(reposted)
                 .NoDuplicates()
@@ -65,14 +56,8 @@ namespace Bulliten.API.Controllers
         {
             UserAccount user = GetAccountFromContext();
 
-            IEnumerable<Post> posts = await _context.Posts
-                .AsNoTracking()
-                .Include(p => p.Author)
-                .Include(p => p.LikedBy)
-                .Include(p => p.RepostedBy)
-                .ToListAsync();
-
-            IEnumerable<Post> userPosts = posts.Where(p => p.Author.ID == user.ID).ToList();
+            IEnumerable<Post> userPosts = await QueryPosts(q => 
+                q.Where(p => p.Author.ID == user.ID));
 
             IEnumerable<int> userFollowingIds = await _context.FollowerTable
                 .AsNoTracking()
@@ -80,11 +65,15 @@ namespace Bulliten.API.Controllers
                 .Select(fr => fr.FolloweeId)
                 .ToListAsync();
 
-            IEnumerable<Post> followedUsersPosts = posts.Where(p => userFollowingIds.Contains(p.Author.ID)).ToList();
+            IEnumerable<Post> followedUsersPosts = await QueryPosts(q =>
+               q.Where(p => userFollowingIds.Contains(p.Author.ID))
+            );
 
-            IEnumerable<Post> reposted = posts
-                .Where(p => p.RepostedBy
-                .Any(ur => ur.UserId == user.ID));
+            IEnumerable<Post> reposted = await QueryPosts(q =>
+                q.Where(p => p.RepostedBy
+                                .Any(ur => ur.UserId == user.ID)
+                )
+            );
 
             IEnumerable<Post> orderedPosts = userPosts
                 .Concat(followedUsersPosts)
@@ -224,6 +213,25 @@ namespace Bulliten.API.Controllers
             await _context.SaveChangesAsync();
 
             return result;
+        }
+
+        /// <summary>
+        /// Adds the passed in filters to a post query 
+        /// </summary>
+        /// <param name="filters">The filters to be applied to the query</param>
+        /// <returns></returns>
+        private async Task<IEnumerable<Post>> QueryPosts(Action<IQueryable<Post>> filters)
+        {
+            var query = _context.Posts
+                   .AsNoTracking()
+                   .Include(p => p.Author)
+                   .Include(p => p.LikedBy)
+                   .Include(p => p.RepostedBy)
+                   .AsQueryable();
+
+            filters(query);
+
+            return await query.ToListAsync();
         }
     }
 }
