@@ -18,22 +18,51 @@
     </v-list-item>
 
     <v-card-actions>
-      <v-btn text>
+      <v-btn
+        v-show="isRePosted"
+        text
+        @click="unrepost"
+      >
+        Un Re-Post
+      </v-btn>
+      <v-btn
+        v-show="!isRePosted"
+        text
+        @click="repost"
+      >
         Re-Post
       </v-btn>
-      <v-btn text>
+
+      <v-btn
+        v-show="isLiked"
+        text
+        @click="unlike"
+      >
+        Un-Like
+      </v-btn>
+      <v-btn
+        v-show="!isLiked"
+        text
+        @click="like"
+      >
         Like
       </v-btn>
     </v-card-actions>
 
+    <v-card-text>
+      Reposts: {{ post.rePosts }}
+      Likes: {{ post.likes }}
+    </v-card-text>
+
     <v-card-subtitle>
-      {{ readableTime(post.creationDate) }}
+      {{ timestamp }}
     </v-card-subtitle>
   </v-card>
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
+import * as api from "@/services/api-interface";
 
 export default Vue.extend({
   props: {
@@ -42,10 +71,38 @@ export default Vue.extend({
       required: true
     }
   },
-  methods: {
-    readableTime(dateString: string): string {
-      const date = new Date(dateString);
+  computed: {
+    isLiked(): boolean {
+      return this.post.likeStatus;
+    },
+    isRePosted(): boolean {
+      return this.post.rePostStatus;
+    },
+    timestamp(): string {
+      const date = new Date(this.post.creationDate);
       return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+    }
+  },
+  methods: {
+    like() {
+      api.likePost(this.post.id);
+      this.post.likeStatus = true;
+      this.post.likes++;
+    },
+    unlike() {
+      api.unlikePost(this.post.id);
+      this.post.likeStatus = false;
+      this.post.likes--;
+    },
+    repost() {
+      api.repost(this.post.id);
+      this.post.rePostStatus = true;
+      this.post.rePosts++;
+    },
+    unrepost() {
+      api.unRepost(this.post.id);
+      this.post.rePostStatus = false;
+      this.post.rePosts--;
     }
   }
 });

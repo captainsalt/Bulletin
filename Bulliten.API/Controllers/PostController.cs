@@ -35,7 +35,17 @@ namespace Bulliten.API.Controllers
             if (user == null)
                 return BadRequest(new Error("User does not exist"));
 
-            IEnumerable<Post> posts = await _context.Posts.ToListAsync();
+            IEnumerable<Post> userPosts = await QueryPosts(q =>
+                q.Where(p => p.Author.ID == user.ID));
+
+            IEnumerable<Post> reposted = await QueryPosts(q =>
+                q.Where(p => p.RepostedBy.Any(ur => ur.UserId == user.ID)));
+
+            IEnumerable<Post> posts = userPosts
+                .Concat(reposted)
+                .NoDuplicates()
+                .OrderByDescending(p => p.CreationDate)
+                .ToList();
 
             return Ok(new { posts });
         }
@@ -45,55 +55,170 @@ namespace Bulliten.API.Controllers
         {
             UserAccount user = GetAccountFromContext();
 
-            IEnumerable<int> following = await _context.FollowerTable
+            IEnumerable<Post> userPosts = await QueryPosts(q =>
+                q.Where(p => p.Author.ID == user.ID));
+
+            IEnumerable<int> userFollowingIds = await _context.FollowerTable
+                .AsNoTracking()
                 .Where(fr => fr.FollowerId == user.ID)
                 .Select(fr => fr.FolloweeId)
                 .ToListAsync();
 
-            IEnumerable<Post> posts = await _context.Posts.Include(p => p.Author).ToListAsync();
+            IEnumerable<Post> followedUsersPosts = await QueryPosts(q =>
+                q.Where(p => userFollowingIds.Contains(p.Author.ID))
+            );
 
-            IEnumerable<Post> userPosts = posts.Where(p => p.Author.ID == user.ID).ToList();
-            IEnumerable<Post> followingPosts = posts.Where(p => following.Contains(p.Author.ID)).ToList();
+            IEnumerable<Post> reposted = await QueryPosts(q =>
+                q.Where(p => p.RepostedBy
+                                .Any(ur => ur.UserId == user.ID)
+                )
+            );
 
             IEnumerable<Post> orderedPosts = userPosts
-                .Concat(followingPosts)
+                .Concat(followedUsersPosts)
+                .Concat(reposted)
+                .NoDuplicates()
                 .OrderByDescending(p => p.CreationDate);
 
             return Ok(new { posts = orderedPosts });
         }
 
-        // GET api/<PostController>/5
-        [HttpGet("{id}")]
-        public string Get(int id) => "value";
+        [HttpPost("like")]
+        public async Task<IActionResult> LikePost(int postId)
+        {
+            return await ActOnPost(
+                postId,
+                new List<string> { "LikedPosts" },
+                (post, user) =>
+                {
+                    if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
+                        return BadRequest(new Error("Cannot like a post you already liked"));
 
-        // POST api/<PostController>
+                    user.LikedPosts.Add(new UserLike { Post = post, User = user });
+                    post.Likes++;
+
+                    return Ok();
+                }
+            );
+        }
+
+        [HttpPost("unlike")]
+        public async Task<IActionResult> UnlikePost(int postId)
+        {
+            return await ActOnPost(
+                postId,
+                new List<string> { "LikedPosts" },
+                (post, user) =>
+                {
+                    UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
+                    bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
+
+                    if (likeWasRemoved)
+                        post.Likes--;
+
+                    return Ok();
+                }
+            );
+        }
+
+        [HttpPost("repost")]
+        public async Task<IActionResult> RePost(int postId)
+        {
+            return await ActOnPost(
+                postId,
+                new List<string> { "RePosts" },
+                (post, user) =>
+                {
+                    if (user.RePosts.Any(ur => ur.PostId == post.ID))
+                        return BadRequest(new Error("Cannot repost a post you already reposted"));
+
+                    user.RePosts.Add(new UserRepost { Post = post, User = user });
+                    post.RePosts++;
+
+                    return Ok();
+                }
+            );
+        }
+
+        [HttpPost("unrepost")]
+        public async Task<IActionResult> UnRePost(int postId)
+        {
+            return await ActOnPost(
+                postId,
+                new List<string> { "RePosts" },
+                (post, user) =>
+                {
+                    UserRepost userRepostToRemove = user.RePosts.SingleOrDefault(ur => ur.PostId == post.ID);
+                    bool repostWasRemoved = user.RePosts.Remove(userRepostToRemove);
+
+                    if (repostWasRemoved)
+                        post.RePosts--;
+
+                    return Ok();
+                }
+            );
+        }
+
         [HttpPost("create")]
         public async Task CreatePost([FromForm] Post formPost)
         {
-            UserAccount ctxUser = GetAccountFromContext();
-            UserAccount dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == ctxUser.ID);
-
-            formPost.Author = ctxUser;
-            formPost.CreationDate = DateTime.Now;
+            UserAccount dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == GetAccountFromContext().ID);
 
             dbUser.Posts.Add(formPost);
+
             await _context.SaveChangesAsync();
 
             Ok();
         }
 
-        // PUT api/<PostController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        private UserAccount GetAccountFromContext() =>
+            (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+
+        /// <summary>
+        /// Applies the passed in function delegate parameter to a specific post
+        /// </summary>
+        /// <param name="postId">Id of the post to apply the function delegate to</param>
+        /// <param name="includeProps">Dependent properties to load from the database for the <see cref="UserAccount"/> object in the function delegate</param>
+        /// <param name="funcDelegate">The method applied to the post parameter</param>
+        /// <returns></returns>
+        private async Task<IActionResult> ActOnPost(
+            int postId,
+            IEnumerable<string> includeProps,
+            Func<Post, UserAccount, IActionResult> funcDelegate)
         {
+            Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
+
+            if (post == null) return BadRequest(new Error("Post with provided ID does not exist"));
+
+            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.ID == GetAccountFromContext().ID);
+
+            foreach (string propName in includeProps)
+                await _context.Entry(user).Collection(propName).LoadAsync();
+
+            IActionResult result = funcDelegate(post, user);
+
+            await _context.SaveChangesAsync();
+
+            return result;
         }
 
-        // DELETE api/<PostController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        /// <summary>
+        /// Adds the passed in filters to a post query 
+        /// </summary>
+        /// <param name="filters">The filters to be applied to the query</param>
+        /// <returns></returns>
+        private async Task<IEnumerable<Post>> QueryPosts(Func<IQueryable<Post>, IQueryable<Post>> filters)
         {
-        }
+            IQueryable<Post> query = _context.Posts
+                   .AsNoTracking()
+                   .Include(p => p.Author)
+                   .Include(p => p.LikedBy)
+                   .Include(p => p.RepostedBy)
+                   .AsQueryable();
 
-        private UserAccount GetAccountFromContext() => (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+            IQueryable<Post> newQuery = filters(query);
+
+            return await newQuery.ToListAsync();
+        }
     }
 }
