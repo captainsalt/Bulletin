@@ -1,9 +1,6 @@
 ﻿using Bulliten.API.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Bulliten.API.Utilities
 {
@@ -20,7 +17,7 @@ namespace Bulliten.API.Utilities
         {
             HashSet<T> newList = new HashSet<T>(new EntityComparer<T>());
 
-            foreach (var entity in entities)
+            foreach (T entity in entities)
                 newList.Add(entity);
 
             return newList;

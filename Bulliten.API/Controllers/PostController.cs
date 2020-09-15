@@ -210,11 +210,11 @@ namespace Bulliten.API.Controllers
         private async Task<IEnumerable<Post>> QueryPosts(Func<IQueryable<Post>, IQueryable<Post>> filters)
         {
             IQueryable<Post> query = _context.Posts
-                   .AsNoTracking()
-                   .Include(p => p.Author)
-                   .Include(p => p.LikedBy)
-                   .Include(p => p.RepostedBy)
-                   .AsQueryable();
+                .AsNoTracking()
+                .Include(p => p.Author)
+                .Include(p => p.LikedBy)
+                .Include(p => p.RepostedBy)
+                .AsQueryable();
 
             IQueryable<Post> newQuery = filters(query);
 
