@@ -20,8 +20,8 @@ function fetchRequest(method: string, route: string, options: RequestInit) {
   });
 }
 
-async function getErrorMesssage(response: Response): Promise<string> {
-  return (await response.json()).message;
+async function getError(response: Response): Promise<Error> {
+  return new Error((await response.json()).message);
 }
 
 export async function createAccount(username: string, password: string): Promise<AuthResponse> {
@@ -34,7 +34,7 @@ export async function createAccount(username: string, password: string): Promise
   });
 
   if (!response.ok)
-    throw Error(await getErrorMesssage(response));
+    throw await getError(response);
 
   return response.json();
 }
@@ -49,20 +49,22 @@ export async function login(username: string, password: string): Promise<AuthRes
   });
 
   if (!response.ok)
-    throw Error(await getErrorMesssage(response));
+    throw await getError(response);
 
   return response.json();
 }
 
-export function createPost(content: string): Promise<Response> {
+export async function createPost(content: string): Promise<void> {
   const form = new FormData();
-
   form.append("content", content);
 
-  return fetchRequest("POST", "/post/create", {
+  const response = await fetchRequest("POST", "/post/create", {
     body: form,
     headers: getAuthHeader()
   });
+
+  if (!response.ok)
+    throw await getError(response);
 }
 
 export async function getPublicFeed(username: string): Promise<Post[]> {
@@ -71,7 +73,7 @@ export async function getPublicFeed(username: string): Promise<Post[]> {
   });
 
   if (!response.ok)
-    throw Error(await getErrorMesssage(response));
+    throw await getError(response);
 
   return (await response.json()).posts;
 }
@@ -82,7 +84,7 @@ export async function getPersonalFeed(): Promise<Post[]> {
   });
 
   if (!response.ok)
-    throw Error(await getErrorMesssage(response));
+    throw await getError(response);
 
   return (await response.json()).posts;
 }
@@ -93,7 +95,7 @@ export async function getUser(username: string): Promise<UserAccount> {
   });
 
   if (!response.ok)
-    throw Error(await getErrorMesssage(response));
+    throw await getError(response);
 
   return (await response.json()).user;
 }
@@ -104,7 +106,7 @@ export async function followUser(username: string): Promise<void> {
   });
 
   if (!response.ok)
-    throw Error((await response.json()).message);
+    throw await getError(response);
 }
 
 export async function unfollowUser(username: string): Promise<void> {
@@ -113,7 +115,7 @@ export async function unfollowUser(username: string): Promise<void> {
   });
 
   if (!response.ok)
-    throw Error((await response.json()).message);
+    throw await getError(response);
 }
 
 export async function likePost(postId: number): Promise<void> {
@@ -122,7 +124,7 @@ export async function likePost(postId: number): Promise<void> {
   });
 
   if (!response.ok)
-    throw Error((await response.json()).message);
+    throw await getError(response);
 }
 
 export async function unlikePost(postId: number): Promise<void> {
@@ -131,7 +133,7 @@ export async function unlikePost(postId: number): Promise<void> {
   });
 
   if (!response.ok)
-    throw Error((await response.json()).message);
+    throw await getError(response);
 }
 
 export async function repost(postId: number): Promise<void> {
@@ -140,7 +142,7 @@ export async function repost(postId: number): Promise<void> {
   });
 
   if (!response.ok)
-    throw Error((await response.json()).message);
+    throw await getError(response);
 }
 
 export async function unRepost(postId: number): Promise<void> {
@@ -149,7 +151,7 @@ export async function unRepost(postId: number): Promise<void> {
   });
 
   if (!response.ok)
-    throw Error((await response.json()).message);
+    throw await getError(response);
 }
 
 export async function getFollowInfo(username: string): Promise<{ followers: UserAccount[]; following: UserAccount[] }> {
@@ -158,7 +160,7 @@ export async function getFollowInfo(username: string): Promise<{ followers: User
   });
 
   if (!response.ok)
-    throw Error((await response.json()).message);
+    throw await getError(response);
 
   return response.json();
 }
