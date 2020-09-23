@@ -5,6 +5,7 @@ using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,15 +19,18 @@ namespace Bulliten.API.Controllers
         private readonly ILogger<UserAccountController> _logger;
         private readonly BullitenDBContext _context;
         private readonly IAuthenticationService _authService;
+        private readonly IUserAccountService _userAccountService;
 
         public UserAccountController(
             BullitenDBContext context,
             ILogger<UserAccountController> logger,
-            IAuthenticationService accountService)
+            IAuthenticationService authService,
+            IUserAccountService userAccountService)
         {
             _logger = logger;
             _context = context;
-            _authService = accountService;
+            _authService = authService;
+            _userAccountService = userAccountService;
         }
 
         [HttpGet("all")]
@@ -122,22 +126,18 @@ namespace Bulliten.API.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccount([FromForm] UserAccount formAccount)
         {
-            bool isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
+            try
+            {
+                await _userAccountService.CreateAccount(formAccount);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = "Error while creating account";
 
-            if (isInvalidUsername)
-                return BadRequest(new Error($"Username \"{formAccount.Username}\" is already in use"));
-
-            await _context.UserAccounts.AddAsync(formAccount);
-            await _context.SaveChangesAsync();
-
-            AuthenticationResponse auth = await _authService
-                .Authenticate(new AuthenticationRequest
-                {
-                    Username = formAccount.Username,
-                    Password = formAccount.Password
-                });
-
-            return StatusCode(201, new { token = auth.Token, user = formAccount });
+                _logger.LogCritical(ex, errorMessage);
+                return Problem(errorMessage);
+            }
         }
 
         [HttpPost("login")]
