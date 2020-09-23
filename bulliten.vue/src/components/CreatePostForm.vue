@@ -32,15 +32,9 @@ export default Vue.extend({
     errorMsg: ""
   }),
   methods: {
-    async createPost() {
-      const response = await api.createPost(this.content);
-
-      if (!response.ok) {
-        this.errorMsg = "Error posting";
-        return;
-      }
-
-      this.errorMsg = "";
+    async createPost(): Promise<void> {
+      await api.createPost(this.content)
+        .catch((err: Error) => this.errorMsg = err.message);
     }
   }
 });
