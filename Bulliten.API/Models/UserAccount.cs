@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class UserAccount : Entity<UserAccount>
+    public class UserAccount : Entity
     {
         public UserAccount()
         {

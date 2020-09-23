@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class Post : Entity<Post>
+    public class Post : Entity
     {
         public string Content { get; set; }
 
