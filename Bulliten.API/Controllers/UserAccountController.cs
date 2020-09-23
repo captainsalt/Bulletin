@@ -58,30 +58,6 @@ namespace Bulliten.API.Controllers
             return Ok(new { user, followerCount, followingCount, isFollowed });
         }
 
-        [HttpGet("followinfo")]
-        [Authorize]
-        public async Task<IActionResult> GetUserFollowings([FromQuery] string username)
-        {
-            UserAccount user = await _context.UserAccounts
-                .Include(u => u.Followers)
-                .SingleOrDefaultAsync(u => u.Username == username);
-
-            if (user == null)
-                return BadRequest(new Error("User does not exist"));
-
-            IEnumerable<UserAccount> followers = await _context.FollowerTable
-                .Where(fr => fr.FolloweeId == user.ID)
-                .Select(fr => fr.Follower)
-                .ToListAsync();
-
-            IEnumerable<UserAccount> following = await _context.FollowerTable
-                .Where(fr => fr.FollowerId == user.ID)
-                .Select(fr => fr.Followee)
-                .ToListAsync();
-
-            return Ok(new { following, followers });
-        }
-
         [HttpPost("follow")]
         [Authorize]
         public async Task<IActionResult> FollowUser([FromQuery] string username)
