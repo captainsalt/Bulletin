@@ -7,17 +7,8 @@ using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class Post : IEntity<Post>
+    public class Post : Entity<Post>
     {
-        public Post()
-        {
-            CreationDate = DateTime.UtcNow;
-        }
-
-        public int ID { get; set; }
-
-        public DateTime CreationDate { get; set; }
-
         public string Content { get; set; }
 
         public int Likes { get; set; }
@@ -43,10 +34,6 @@ namespace Bulliten.API.Models
 
         [JsonIgnore]
         public ICollection<UserRepost> RepostedBy { get; set; } = new List<UserRepost>();
-
-        public bool Equals([AllowNull] Post x, [AllowNull] Post y) => x.ID == y.ID;
-
-        public int GetHashCode([DisallowNull] Post obj) => throw new NotImplementedException();
 
         public void PopulateStatuses(UserAccount user)
         {

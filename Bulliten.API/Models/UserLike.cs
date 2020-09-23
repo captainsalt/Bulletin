@@ -1,6 +1,6 @@
 ﻿namespace Bulliten.API.Models
 {
-    public class UserLike
+    public class UserLike : Entity<UserLike>
     {
         public int UserId { get; set; }
         public UserAccount User { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Bulliten.API.Models
 {
-    public class UserRepost
+    public class UserRepost : Entity<UserAccount>
     {
         public int UserId { get; set; }
         public UserAccount User { get; set; }

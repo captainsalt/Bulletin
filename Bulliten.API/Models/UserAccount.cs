@@ -5,16 +5,12 @@ using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class UserAccount : IEntity<UserAccount>
+    public class UserAccount : Entity<UserAccount>
     {
         public UserAccount()
         {
             CreationDate = DateTime.UtcNow;
         }
-
-        public int ID { get; set; }
-
-        public DateTime CreationDate { get; set; }
 
         public string Username { get; set; }
 
@@ -32,9 +28,5 @@ namespace Bulliten.API.Models
 
         [JsonIgnore]
         public ICollection<UserLike> LikedPosts { get; set; } = new List<UserLike>();
-
-        public bool Equals([AllowNull] UserAccount x, [AllowNull] UserAccount y) => x.ID == y.ID;
-
-        public int GetHashCode([DisallowNull] UserAccount obj) => throw new NotImplementedException();
     }
 }
