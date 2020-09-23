@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
@@ -13,6 +13,11 @@ namespace Bulliten.API.Models
         }
 
         public string Username { get; set; }
+
+        /// <summary>
+        /// True if user is followed by the context user
+        /// </summary>
+        public bool FollowStatus { get; set; }
 
         [JsonIgnore]
         public string Password { get; set; }
@@ -28,5 +33,8 @@ namespace Bulliten.API.Models
 
         [JsonIgnore]
         public ICollection<UserLike> LikedPosts { get; set; } = new List<UserLike>();
+
+        public void PopulateStatuses(UserAccount user) => 
+            FollowStatus = Followers.FirstOrDefault(fr => fr.FolloweeId == user.ID) != null;
     }
 }
