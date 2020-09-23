@@ -47,6 +47,10 @@ namespace Bulliten.API.Controllers
                 .OrderByDescending(p => p.CreationDate)
                 .ToList();
 
+            posts
+                .AsParallel()
+                .ForAll(p => p.PopulateStatuses(GetAccountFromContext()));
+
             return Ok(new { posts });
         }
 

@@ -35,8 +35,8 @@ namespace Bulliten.API.Models
 
         public void PopulateStatuses(UserAccount user)
         {
-            RePostStatus = RepostedBy.FirstOrDefault(ul => ul.UserId == user.ID) != null;
-            LikeStatus = LikedBy.FirstOrDefault(ul => ul.UserId == user.ID) != null;
+            RePostStatus = RepostedBy.Any(ul => ul.UserId == user.ID);
+            LikeStatus = LikedBy.Any(ul => ul.UserId == user.ID);
         }
     }
 }
