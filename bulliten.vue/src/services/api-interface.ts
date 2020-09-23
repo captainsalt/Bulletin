@@ -89,15 +89,15 @@ export async function getPersonalFeed(): Promise<Post[]> {
   return (await response.json()).posts;
 }
 
-export async function getUser(username: string): Promise<UserAccount> {
-  const response = await fetchRequest("GET", `/user?username=${username}`, {
+export async function getUserProfile(username: string): Promise<UserProfile> {
+  const response = await fetchRequest("GET", `/user/profile?username=${username}`, {
     headers: getAuthHeader()
   });
 
   if (!response.ok)
     throw await getError(response);
 
-  return (await response.json()).user;
+  return await response.json();
 }
 
 export async function followUser(username: string): Promise<void> {
@@ -154,13 +154,3 @@ export async function unRepost(postId: number): Promise<void> {
     throw await getError(response);
 }
 
-export async function getFollowInfo(username: string): Promise<{ followers: UserAccount[]; following: UserAccount[] }> {
-  const response = await fetchRequest("GET", `/user/followinfo?username=${username}`, {
-    headers: getAuthHeader()
-  });
-
-  if (!response.ok)
-    throw await getError(response);
-
-  return response.json();
-}
