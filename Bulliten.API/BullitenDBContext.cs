@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Bulliten.API
 {
-    public class BullitenDBContext : DbContext
+    public class BullitenDBContext : DbContext, IBullitenDBContext
     {
         private readonly IConfiguration _config;
 

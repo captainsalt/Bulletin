@@ -22,7 +22,7 @@ namespace Bulliten.API
         {
             services.AddCors();
             services.AddControllers();
-            services.AddDbContext<BullitenDBContext>(ServiceLifetime.Transient);
+            services.AddDbContext<IBullitenDBContext, BullitenDBContext>(ServiceLifetime.Transient);
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IUserAccountService, UserAccountService>();
         }
