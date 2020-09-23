@@ -10,18 +10,10 @@
 
         <v-card-actions v-if="!isOwnProfile">
           <v-btn
-            v-if="profile.isFollowed"
             text
-            @click="unfollow"
+            @click="() => { profile.isFollowed ? unfollow() : follow() }"
           >
-            Unfollow
-          </v-btn>
-          <v-btn
-            v-else
-            text
-            @click="follow"
-          >
-            Follow
+            {{ profile.isFollowed ? "Unfollow" : "Follow" }}
           </v-btn>
         </v-card-actions>
 
