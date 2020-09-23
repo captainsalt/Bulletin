@@ -24,7 +24,7 @@ namespace Bulliten.API.Services
             bool isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
 
             if (isInvalidUsername)
-                throw new Exception($"Username \"{formAccount.Username}\" is already in use");
+                throw new ArgumentException($"Username \"{formAccount.Username}\" is already in use");
 
             await _context.UserAccounts.AddAsync(formAccount);
             await _context.SaveChangesAsync();

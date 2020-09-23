@@ -133,10 +133,7 @@ namespace Bulliten.API.Controllers
             }
             catch (Exception ex)
             {
-                string errorMessage = "Error while creating account";
-
-                _logger.LogCritical(ex, errorMessage);
-                return Problem(errorMessage);
+                return HandleException(ex);
             }
         }
 
@@ -161,5 +158,18 @@ namespace Bulliten.API.Controllers
 
         private UserAccount GetAccountFromContext() =>
             (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+
+        private IActionResult HandleException(Exception ex)
+        {
+            if (ex is ArgumentException argEx)
+            {
+                return BadRequest(new Error(argEx.Message));
+            }
+            else
+            {
+                _logger.LogCritical(ex, "Internal server error");
+                return Problem("An internal server error has occured");
+            }
+        }
     }
 }

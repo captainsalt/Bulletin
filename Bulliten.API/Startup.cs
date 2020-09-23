@@ -24,6 +24,7 @@ namespace Bulliten.API
             services.AddControllers();
             services.AddDbContext<BullitenDBContext>(ServiceLifetime.Transient);
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IUserAccountService, UserAccountService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
