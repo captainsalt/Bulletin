@@ -7,11 +7,6 @@ namespace Bulliten.API.Models
 {
     public class UserAccount : Entity
     {
-        public UserAccount()
-        {
-            CreationDate = DateTime.UtcNow;
-        }
-
         public string Username { get; set; }
 
         [JsonIgnore]
