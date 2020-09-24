@@ -1,6 +1,7 @@
 ﻿using Bulliten.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace Bulliten.API
 {
@@ -43,5 +44,7 @@ namespace Bulliten.API
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseNpgsql(_config.GetConnectionString("postgres"));
+
+        public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
     }
 }
