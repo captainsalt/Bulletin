@@ -19,26 +19,24 @@ namespace Bulliten.API.Utilities
 
         private readonly RequestDelegate _next;
         private readonly IConfiguration _configuration;
-        private readonly BullitenDBContext _context;
 
-        public JwtMiddleware(RequestDelegate next, IConfiguration configuration, BullitenDBContext context)
+        public JwtMiddleware(RequestDelegate next, IConfiguration configuration)
         {
             _next = next;
             _configuration = configuration;
-            _context = context;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext httpContext, BullitenDBContext dbContext)
         {
-            string token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            string token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                await AttachUserToContext(context, token);
+                await AttachUserToContext(httpContext, dbContext, token);
 
-            await _next(context);
+            await _next(httpContext);
         }
 
-        private async Task AttachUserToContext(HttpContext context, string token)
+        private async Task AttachUserToContext(HttpContext httpContext, BullitenDBContext dbContext, string token)
         {
             try
             {
@@ -59,7 +57,7 @@ namespace Bulliten.API.Utilities
                 int userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
 
                 // attach user to context on successful jwt validation
-                context.Items[CONTEXT_USER] = await _context.UserAccounts.FirstOrDefaultAsync(u => u.ID == userId);
+                httpContext.Items[CONTEXT_USER] = await dbContext.UserAccounts.FirstOrDefaultAsync(u => u.ID == userId);
             }
             catch
             {
