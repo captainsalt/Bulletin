@@ -8,10 +8,10 @@ namespace Bulliten.API.Services
 {
     public class UserAccountService : IUserAccountService
     {
-        private readonly IBullitenDBContext _context;
+        private readonly BullitenDBContext _context;
         private readonly IAuthenticationService _authService;
 
-        public UserAccountService(IBullitenDBContext context, IAuthenticationService authService)
+        public UserAccountService(BullitenDBContext context, IAuthenticationService authService)
         {
             _context = context;
             _authService = authService;
