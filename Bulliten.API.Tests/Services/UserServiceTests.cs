@@ -29,23 +29,33 @@ namespace Bulliten.API.Tests
         }
 
         [Fact]
-        public async Task Account_GetsCreated()
+        public async Task CreateAccount_AddsUserToDababase()
         {
             await _target.CreateAccount(_testUser);
+
             Assert.NotNull(_context.UserAccounts.ToList());
         }
 
         [Fact]
-        public async Task Account_CanLogin()
+        public async Task CreateAccount_Throws_IfAccountUsernameExists()
+        {
+            await _target.CreateAccount(_testUser);
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _target.CreateAccount(_testUser));
+        }
+
+        [Fact]
+        public async Task Login_ReturnsCredentials()
         {
             await _target.CreateAccount(_testUser);
             AuthenticationResponse response = await _target.Login(_testUser);
 
             Assert.NotNull(response.User);
+            Assert.NotNull(response.Token);
         }
 
         [Fact]
-        public async Task Login_Throws_OnInvalidCredentials()
+        public async Task Login_Throws_IfInvalidCredentials()
         {
             await _target.CreateAccount(_testUser);
             _testUser.Password = "WrongPassword";
