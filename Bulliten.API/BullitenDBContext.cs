@@ -5,13 +5,16 @@ using System.Threading.Tasks;
 
 namespace Bulliten.API
 {
-    public class BullitenDBContext : DbContext, IBullitenDBContext
+    public class BullitenDBContext : DbContext
     {
-        private readonly IConfiguration _config;
-
-        public BullitenDBContext(IConfiguration config)
+        public BullitenDBContext()
         {
-            _config = config;
+            Database.EnsureCreated();
+        }
+
+        public BullitenDBContext(DbContextOptions optionsBuilder) 
+            : base(optionsBuilder) 
+        {
             Database.EnsureCreated();
         }
 
@@ -41,10 +44,5 @@ namespace Bulliten.API
             modelBuilder.Entity<UserRepost>()
                 .HasKey(ur => new { ur.UserId, ur.PostId });
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-            optionsBuilder.UseNpgsql(_config.GetConnectionString("postgres"));
-
-        public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
     }
 }
