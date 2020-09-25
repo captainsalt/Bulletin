@@ -14,6 +14,6 @@ namespace Bulliten.API.Services
 
         Task<AuthenticationResponse> CreateAccount(UserAccount account);
 
-        Task Login(string username, string password);
+        Task<AuthenticationResponse> Login(UserAccount account);
     }
 }

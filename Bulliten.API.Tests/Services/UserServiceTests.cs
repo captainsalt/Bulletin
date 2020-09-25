@@ -1,4 +1,5 @@
 using Bulliten.API.Models;
+using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -34,9 +35,24 @@ namespace Bulliten.API.Tests
             Assert.NotNull(_context.UserAccounts.ToList());
         }
 
-        public void Dispose()
+        [Fact]
+        public async Task Account_CanLogin()
         {
-            _context.Dispose();
+            await _target.CreateAccount(_testUser);
+            AuthenticationResponse response = await _target.Login(_testUser);
+
+            Assert.NotNull(response.User);
         }
+
+        [Fact]
+        public async Task Login_Throws_OnInvalidCredentials()
+        {
+            await _target.CreateAccount(_testUser);
+            _testUser.Password = "WrongPassword";
+
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _target.Login(_testUser));
+        }
+
+        public void Dispose() => _context.Dispose();
     }
 }

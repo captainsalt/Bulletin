@@ -34,10 +34,24 @@ namespace Bulliten.API.Services
                     Password = formAccount.Password
                 });
         }
+        public async Task<AuthenticationResponse> Login(UserAccount formAccount)
+        {
+            UserAccount matchedAccount = await _context.UserAccounts
+                .SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
+
+            if (matchedAccount == null)
+                throw new ArgumentException("Invalid username or password");
+
+            return await _authService
+                .Authenticate(new AuthenticationRequest
+                {
+                    Username = matchedAccount.Username,
+                    Password = matchedAccount.Password
+                });
+        }
 
         public Task FollowUser(string username) => throw new NotImplementedException();
         public UserAccount GetUserByUsername(string username) => throw new NotImplementedException();
-        public Task Login(string username, string password) => throw new NotImplementedException();
         public Task UnfollowUser(string username) => throw new NotImplementedException();
     }
 }

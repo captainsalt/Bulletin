@@ -140,20 +140,15 @@ namespace Bulliten.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] UserAccount formAccount)
         {
-            UserAccount matchedAccount = await _context.UserAccounts
-                .SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
-
-            if (matchedAccount == null)
-                return BadRequest(new Error("Invalid username or password"));
-
-            AuthenticationResponse auth = await _authService
-                .Authenticate(new AuthenticationRequest
-                {
-                    Username = matchedAccount.Username,
-                    Password = matchedAccount.Password
-                });
-
-            return Ok(new { token = auth.Token, user = matchedAccount });
+            try
+            {
+               var authResponse =  await _userAccountService.Login(formAccount);
+                return Ok(new { token = authResponse.Token, user = authResponse.User } );
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         private UserAccount GetAccountFromContext() =>
