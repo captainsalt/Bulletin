@@ -15,7 +15,7 @@ namespace Bulliten.API.Utilities
     {
         public static IEnumerable<T> NoDuplicates<T>(this IEnumerable<T> entities) where T : IEntity
         {
-            HashSet<T> newList = new HashSet<T>(new EntityComparer<T>());
+            var newList = new HashSet<T>(new EntityComparer<T>());
 
             foreach (T entity in entities)
                 newList.Add(entity);

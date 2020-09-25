@@ -1,7 +1,5 @@
 ﻿using Bulliten.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
 
 namespace Bulliten.API
 {
@@ -12,8 +10,8 @@ namespace Bulliten.API
             Database.EnsureCreated();
         }
 
-        public BullitenDBContext(DbContextOptions optionsBuilder) 
-            : base(optionsBuilder) 
+        public BullitenDBContext(DbContextOptions optionsBuilder)
+            : base(optionsBuilder)
         {
             Database.EnsureCreated();
         }

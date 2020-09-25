@@ -10,7 +10,7 @@ namespace Bulliten.API.Utilities
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            UserAccount user = (UserAccount)context.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+            var user = (UserAccount)context.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 
             if (user == null)
                 context.Result = new BadRequestObjectResult(new Error("Unauthorized"));

@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace Bulliten.API.Models.Authentication
+﻿namespace Bulliten.API.Models.Authentication
 {
     public class AuthenticationResponse
     {

@@ -40,7 +40,7 @@ namespace Bulliten.API.Utilities
         {
             try
             {
-                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                var tokenHandler = new JwtSecurityTokenHandler();
                 byte[] key = Encoding.ASCII.GetBytes(_configuration["Secret"]);
 
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -53,7 +53,7 @@ namespace Bulliten.API.Utilities
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
 
-                JwtSecurityToken jwtToken = (JwtSecurityToken)validatedToken;
+                var jwtToken = (JwtSecurityToken)validatedToken;
                 int userId = int.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value);
 
                 // attach user to context on successful jwt validation
