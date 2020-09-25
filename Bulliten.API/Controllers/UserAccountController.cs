@@ -128,8 +128,8 @@ namespace Bulliten.API.Controllers
         {
             try
             {
-                await _userAccountService.CreateAccount(formAccount);
-                return Ok();
+                AuthenticationResponse authResponse = await _userAccountService.CreateAccount(formAccount);
+                return Ok(authResponse);
             }
             catch (Exception ex)
             {
@@ -142,8 +142,8 @@ namespace Bulliten.API.Controllers
         {
             try
             {
-               var authResponse =  await _userAccountService.Login(formAccount);
-                return Ok(new { token = authResponse.Token, user = authResponse.User } );
+                AuthenticationResponse authResponse = await _userAccountService.Login(formAccount);
+                return Ok(authResponse);
             }
             catch (Exception ex)
             {
