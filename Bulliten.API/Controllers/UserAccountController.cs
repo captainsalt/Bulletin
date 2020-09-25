@@ -66,33 +66,15 @@ namespace Bulliten.API.Controllers
         [Authorize]
         public async Task<IActionResult> FollowUser([FromQuery] string username)
         {
-            UserAccount ctxUser = GetAccountFromContext();
-
-            if (ctxUser.Username == username)
-                return BadRequest(new Error("Cannot follow yourself"));
-
-            UserAccount targetUser = await _context.UserAccounts
-                .Include(u => u.Followers)
-                .SingleOrDefaultAsync(u => u.Username == username);
-
-            if (targetUser == null)
-                return BadRequest(new Error("User does not exist"));
-
-            FollowRecord followRecord = targetUser.Followers
-                .SingleOrDefault(fr => fr.FollowerId == ctxUser.ID);
-
-            if (followRecord != null)
-                return BadRequest(new Error("Already following"));
-
-            targetUser.Followers.Add(new FollowRecord
+            try
             {
-                Followee = targetUser,
-                Follower = ctxUser,
-            });
-
-            await _context.SaveChangesAsync();
-
-            return Ok();
+                await _userAccountService.FollowUser(GetAccountFromContext(), username);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("unfollow")]

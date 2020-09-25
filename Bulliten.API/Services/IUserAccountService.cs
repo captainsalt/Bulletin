@@ -8,7 +8,7 @@ namespace Bulliten.API.Services
     {
         UserAccount GetUserByUsername(string username);
 
-        Task FollowUser(string username);
+        Task FollowUser(UserAccount ctxUser, string username);
 
         Task UnfollowUser(string username);
 

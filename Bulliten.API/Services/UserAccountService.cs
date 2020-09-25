@@ -2,6 +2,7 @@
 using Bulliten.API.Models.Authentication;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Services
@@ -34,6 +35,7 @@ namespace Bulliten.API.Services
                     Password = formAccount.Password
                 });
         }
+
         public async Task<AuthenticationResponse> Login(UserAccount formAccount)
         {
             UserAccount matchedAccount = await _context.UserAccounts
@@ -50,7 +52,39 @@ namespace Bulliten.API.Services
                 });
         }
 
-        public Task FollowUser(string username) => throw new NotImplementedException();
+        /// <summary>
+        /// Adds <paramref name="ctxUser"/> to <paramref name="username"/>'s Followers list
+        /// </summary>
+        /// <param name="ctxUser">User making the request to follow</param>
+        /// <param name="username">Username of account being followed</param>
+        /// <returns></returns>
+        public async Task FollowUser(UserAccount ctxUser, string username)
+        {
+            if (ctxUser.Username == username)
+                throw new ArgumentException("Cannot follow yourself");
+
+            UserAccount targetUser = await _context.UserAccounts
+                .Include(u => u.Followers)
+                .SingleOrDefaultAsync(u => u.Username == username);
+
+            if (targetUser == null)
+                throw new ArgumentException("User does not exist");
+
+            FollowRecord followRecord = targetUser.Followers
+                .SingleOrDefault(fr => fr.FollowerId == ctxUser.ID);
+
+            if (followRecord != null)
+                throw new ArgumentException("Already following");
+
+            targetUser.Followers.Add(new FollowRecord
+            {
+                Followee = targetUser,
+                Follower = ctxUser,
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
         public UserAccount GetUserByUsername(string username) => throw new NotImplementedException();
         public Task UnfollowUser(string username) => throw new NotImplementedException();
     }
