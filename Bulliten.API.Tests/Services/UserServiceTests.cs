@@ -189,6 +189,25 @@ namespace Bulliten.API.Tests
         }
         #endregion
 
+        #region GetUserByUsername
+        [Fact]
+        public async Task GetUserByUsername_RetreivesUserFromDatabase()
+        {
+            await _target.CreateAccount(_testAccounts[0]);
+            UserAccount user = await _target.GetUserByUsername(_testAccounts[0].Username);
+
+            Assert.Equal(_testAccounts[0].Username, user.Username);
+        }
+
+        [Fact]
+        public async Task GetUserByUsername_Throws_IfUserDoesNotExist()
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.GetUserByUsername(_testAccounts[0].Username)
+            );
+        }
+        #endregion
+
         public void Dispose() => _context.Dispose();
     }
 }

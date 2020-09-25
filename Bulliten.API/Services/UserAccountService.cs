@@ -1,6 +1,7 @@
 ﻿using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -112,6 +113,35 @@ namespace Bulliten.API.Services
             await _context.SaveChangesAsync();
         }
 
-        public UserAccount GetUserByUsername(string username) => throw new NotImplementedException();
+        public async Task<UserAccount> GetUserByUsername(string username)
+        {
+            UserAccount user = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+                throw new ArgumentException("User does not exist");
+
+            return user;
+        }
+
+        public async Task<(int following, int followers)> GetFollowInfo(string username)
+        {
+            UserAccount user = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == username);
+
+            int followerCount = await _context.FollowerTable
+                .Where(fr => fr.FolloweeId == user.ID)
+                .CountAsync();
+
+            int followingCount = await _context.FollowerTable
+                .Where(fr => fr.FollowerId == user.ID)
+                .CountAsync();
+
+            return (followingCount, followerCount);
+        }
+
+        public async Task<bool> UserIsFollowing(UserAccount ctxUser, string followeeUsername)
+        {
+            var followee = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == followeeUsername);
+            return followee.Followers.Any(u => u.ID == ctxUser.ID);
+        }
     }
 }

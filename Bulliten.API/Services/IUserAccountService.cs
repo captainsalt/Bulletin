@@ -6,14 +6,18 @@ namespace Bulliten.API.Services
 {
     public interface IUserAccountService
     {
-        UserAccount GetUserByUsername(string username);
+        Task<AuthenticationResponse> CreateAccount(UserAccount formAccount);
 
         Task FollowUser(UserAccount ctxUser, string username);
 
+        Task<(int following, int followers)> GetFollowInfo(string username);
+
+        Task<UserAccount> GetUserByUsername(string username);
+
+        Task<AuthenticationResponse> Login(UserAccount formAccount);
+
         Task UnfollowUser(UserAccount ctxUser, string username);
 
-        Task<AuthenticationResponse> CreateAccount(UserAccount account);
-
-        Task<AuthenticationResponse> Login(UserAccount account);
+        Task<bool> UserIsFollowing(UserAccount ctxUser, string followeeUsername);
     }
 }
