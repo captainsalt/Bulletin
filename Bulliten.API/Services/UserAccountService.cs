@@ -85,7 +85,33 @@ namespace Bulliten.API.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Removes <paramref name="ctxUser"/> from <paramref name="username"/>'s Followers list
+        /// </summary>
+        /// <param name="ctxUser">User making the request to unfollow</param>
+        /// <param name="username">Username of account being unfollowed</param>
+        public async Task UnfollowUser(UserAccount ctxUser, string username)
+        {
+            if (ctxUser.Username == username)
+                throw new ArgumentException("Cannot unfollow yourself");
+
+            UserAccount targetUser = await _context.UserAccounts
+                .Include(u => u.Followers)
+                .SingleOrDefaultAsync(u => u.Username == username);
+
+            if (targetUser == null)
+                throw new ArgumentException("User does not exist");
+
+            FollowRecord followRecord = targetUser.Followers
+                .SingleOrDefault(fr => fr.FollowerId == ctxUser.ID);
+
+            if (followRecord == null)
+                throw new ArgumentException("Cannot unfollow someone you're not following");
+
+            targetUser.Followers.Remove(followRecord);
+            await _context.SaveChangesAsync();
+        }
+
         public UserAccount GetUserByUsername(string username) => throw new NotImplementedException();
-        public Task UnfollowUser(string username) => throw new NotImplementedException();
     }
 }

@@ -133,6 +133,62 @@ namespace Bulliten.API.Tests
         }
         #endregion
 
+        #region UnfollowUser
+        [Fact]
+        public async Task UnfollowUser_RemovesFollowRecordFromDatabase()
+        {
+            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+
+            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+
+            _context.FollowerTable.Add(new FollowRecord { Followee = user2, Follower = user1 });
+
+            await _target.UnfollowUser(user1, user2.Username);
+
+            Assert.Empty(user2.Followers);
+        }
+
+        [Fact]
+        public async Task UnfollowUser_Throws_IfRequestToUnfollowSelf()
+        {
+            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+
+            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.UnfollowUser(user1, user1.Username)
+             );
+        }
+
+        [Fact]
+        public async Task UnfollowUser_Throws_IfUserDoesNotExist()
+        {
+            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+
+            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.UnfollowUser(user1, "NonExistingUsername")
+            );
+        }
+
+        [Fact]
+        public async Task UnfollowUser_Throws_IfNotFollowing()
+        {
+            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+
+            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.UnfollowUser(user1, user2.Username)
+            );
+        }
+        #endregion
+
         public void Dispose() => _context.Dispose();
     }
 }

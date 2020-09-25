@@ -10,7 +10,7 @@ namespace Bulliten.API.Services
 
         Task FollowUser(UserAccount ctxUser, string username);
 
-        Task UnfollowUser(string username);
+        Task UnfollowUser(UserAccount ctxUser, string username);
 
         Task<AuthenticationResponse> CreateAccount(UserAccount account);
 
