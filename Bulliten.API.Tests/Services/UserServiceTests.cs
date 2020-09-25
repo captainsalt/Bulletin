@@ -1,6 +1,8 @@
 using Bulliten.API.Models;
 using Bulliten.API.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Moq;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +10,7 @@ using Xunit;
 
 namespace Bulliten.API.Tests
 {
-    public class UserServiceTests
+    public class UserServiceTests : IDisposable
     {
         private readonly UserAccountService _target;
         private readonly UserAccount _testUser;
@@ -16,12 +18,12 @@ namespace Bulliten.API.Tests
 
         public UserServiceTests()
         {
-            var options = new DbContextOptionsBuilder<BullitenDBContext>()
-                .UseSqlite("Data Source=:memory:")
-                .Options;
+            _context = new ConnectionFactory().CreateContextForSQLite();
 
-            _context = new BullitenDBContext(options);
-            _target = new UserAccountService(_context, new AuthenticationService(null, _context));
+            var configMock = new Mock<IConfiguration>();
+            configMock.Setup(m => m["Secret"]).Returns("SecretTestSTring");
+
+            _target = new UserAccountService(_context, new AuthenticationService(configMock.Object, _context));
             _testUser = new UserAccount { Username = "Test", Password = "Test" };
         }
 
@@ -30,6 +32,11 @@ namespace Bulliten.API.Tests
         {
             await _target.CreateAccount(_testUser);
             Assert.NotNull(_context.UserAccounts.ToList());
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
         }
     }
 }
