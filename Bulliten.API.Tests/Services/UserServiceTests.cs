@@ -23,20 +23,14 @@ namespace Bulliten.API.Tests.Services
 
         public UserServiceTests()
         {
+            var globalMocks = new GlobalMocks();
             _context = new ConnectionFactory().CreateContextForSQLite();
 
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(m => m["Secret"]).Returns("SecretTestString");
-
-            var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-            httpContextAccessorMock
-                .Setup(m => m.HttpContext)
-                .Returns(new DefaultHttpContext());
-            _httpContextAccessor = httpContextAccessorMock.Object;
+            _httpContextAccessor = globalMocks.HttpContextAccessor;
 
             _target = new UserAccountService(
                 _context,
-                new AuthenticationService(configMock.Object, _context),
+                new AuthenticationService(globalMocks.Configuration, _context),
                 _httpContextAccessor
             );
         }
