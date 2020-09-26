@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Bulliten.API.Tests
+namespace Bulliten.API.Tests.Services
 {
     public class UserServiceTests : IDisposable
     {
