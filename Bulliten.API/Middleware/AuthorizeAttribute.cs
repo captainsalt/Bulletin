@@ -13,7 +13,7 @@ namespace Bulliten.API.Middleware
             var user = (UserAccount)context.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 
             if (user == null)
-                context.Result = new BadRequestObjectResult(new Error("Unauthorized"));
+                context.Result = new BadRequestObjectResult(new JsonError("Unauthorized"));
         }
     }
 }

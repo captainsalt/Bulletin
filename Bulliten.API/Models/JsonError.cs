@@ -1,10 +1,10 @@
 ﻿namespace Bulliten.API.Models
 {
-    public class Error
+    public class JsonError
     {
         public string Message { get; set; }
 
-        public Error(string message)
+        public JsonError(string message)
         {
             Message = message;
         }

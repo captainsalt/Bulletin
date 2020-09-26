@@ -124,7 +124,7 @@ namespace Bulliten.API.Controllers
         {
             if (ex is ArgumentException argEx)
             {
-                return BadRequest(new Error(argEx.Message));
+                return BadRequest(new JsonError(argEx.Message));
             }
             else
             {

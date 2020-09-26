@@ -33,7 +33,7 @@ namespace Bulliten.API.Controllers
             UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
-                return BadRequest(new Error("User does not exist"));
+                return BadRequest(new JsonError("User does not exist"));
 
             IEnumerable<Post> userPosts = await QueryPosts(q =>
                 q.Where(p => p.Author.ID == user.ID));
@@ -100,7 +100,7 @@ namespace Bulliten.API.Controllers
                 (post, user) =>
                 {
                     if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
-                        return BadRequest(new Error("Cannot like a post you already liked"));
+                        return BadRequest(new JsonError("Cannot like a post you already liked"));
 
                     user.LikedPosts.Add(new UserLike { Post = post, User = user });
                     post.Likes++;
@@ -138,7 +138,7 @@ namespace Bulliten.API.Controllers
                 (post, user) =>
                 {
                     if (user.RePosts.Any(ur => ur.PostId == post.ID))
-                        return BadRequest(new Error("Cannot repost a post you already reposted"));
+                        return BadRequest(new JsonError("Cannot repost a post you already reposted"));
 
                     user.RePosts.Add(new UserRepost { Post = post, User = user });
                     post.RePosts++;
@@ -196,7 +196,7 @@ namespace Bulliten.API.Controllers
         {
             Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
 
-            if (post == null) return BadRequest(new Error("Post with provided ID does not exist"));
+            if (post == null) return BadRequest(new JsonError("Post with provided ID does not exist"));
 
             UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.ID == GetAccountFromContext().ID);
 
