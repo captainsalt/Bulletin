@@ -19,18 +19,15 @@ namespace Bulliten.API.Controllers
     {
         private readonly ILogger<UserAccountController> _logger;
         private readonly BullitenDBContext _context;
-        private readonly IAuthenticationService _authService;
         private readonly IUserAccountService _userAccountService;
 
         public UserAccountController(
             BullitenDBContext context,
             ILogger<UserAccountController> logger,
-            IAuthenticationService authService,
             IUserAccountService userAccountService)
         {
             _logger = logger;
             _context = context;
-            _authService = authService;
             _userAccountService = userAccountService;
         }
 
