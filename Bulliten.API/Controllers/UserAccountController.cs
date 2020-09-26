@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Controllers
@@ -42,8 +43,17 @@ namespace Bulliten.API.Controllers
         {
             try
             {
-                //var user = _userAccountService.GetUserByUsername(username);
-                return Ok();
+                UserAccount user = await _userAccountService.GetUserByUsername(username);
+                (int followingCount, int followerCount) = await _userAccountService.GetFollowInfo(username);
+                bool isFollowing = await _userAccountService.UserIsFollowing(GetAccountFromContext(), username);
+
+                return Ok(new
+                {
+                    User = user,
+                    followingCount,
+                    followerCount,
+                    isFollowing
+                });
             }
             catch (Exception ex)
             {

@@ -123,7 +123,7 @@ namespace Bulliten.API.Services
             return user;
         }
 
-        public async Task<(int following, int followers)> GetFollowInfo(string username)
+        public async Task<(int followingCount, int followerCount)> GetFollowInfo(string username)
         {
             UserAccount user = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == username);
 

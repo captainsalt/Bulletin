@@ -10,7 +10,7 @@ namespace Bulliten.API.Services
 
         Task FollowUser(UserAccount ctxUser, string username);
 
-        Task<(int following, int followers)> GetFollowInfo(string username);
+        Task<(int followingCount, int followerCount)> GetFollowInfo(string username);
 
         Task<UserAccount> GetUserByUsername(string username);
 
