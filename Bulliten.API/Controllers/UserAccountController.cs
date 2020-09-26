@@ -3,7 +3,6 @@ using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
 using Bulliten.API.Models.Server;
 using Bulliten.API.Services;
-using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

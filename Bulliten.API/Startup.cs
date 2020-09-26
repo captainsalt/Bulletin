@@ -1,6 +1,5 @@
 using Bulliten.API.Middleware;
 using Bulliten.API.Services;
-using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;

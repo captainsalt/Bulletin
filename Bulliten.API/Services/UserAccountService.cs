@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Services

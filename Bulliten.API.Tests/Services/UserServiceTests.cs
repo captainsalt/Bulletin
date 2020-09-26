@@ -1,7 +1,9 @@
+using Bulliten.API.Middleware;
 using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
 using Bulliten.API.Tests.Helpers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
@@ -9,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using static Bulliten.API.Tests.Helpers.BullitenDBContextExtensions;
+using static Bulliten.API.Tests.Helpers.TestHelpers;
 
 namespace Bulliten.API.Tests.Services
 {
@@ -17,15 +19,26 @@ namespace Bulliten.API.Tests.Services
     {
         private readonly UserAccountService _target;
         private readonly BullitenDBContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserServiceTests()
         {
             _context = new ConnectionFactory().CreateContextForSQLite();
 
             var configMock = new Mock<IConfiguration>();
-            configMock.Setup(m => m["Secret"]).Returns("SecretTestSTring");
+            configMock.Setup(m => m["Secret"]).Returns("SecretTestString");
 
-            _target = new UserAccountService(_context, new AuthenticationService(configMock.Object, _context));
+            var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            httpContextAccessorMock
+                .Setup(m => m.HttpContext)
+                .Returns(new DefaultHttpContext());
+            _httpContextAccessor = httpContextAccessorMock.Object;
+
+            _target = new UserAccountService(
+                _context,
+                new AuthenticationService(configMock.Object, _context),
+                _httpContextAccessor
+            );
         }
 
         #region CreateAccount
@@ -99,7 +112,9 @@ namespace Bulliten.API.Tests.Services
             UserAccount user1 = _context.UserAccounts.Find(users.First().ID);
             UserAccount user2 = _context.UserAccounts.Find(users.Last().ID);
 
-            await _target.FollowUser(user1, user2.Username);
+            _httpContextAccessor.SetContextUser(user1);
+
+            await _target.FollowUser(user2.Username);
 
             FollowRecord followRecord = _context.FollowerTable.First();
 
@@ -118,8 +133,10 @@ namespace Bulliten.API.Tests.Services
 
             UserAccount user = _context.UserAccounts.Find(testUser.ID);
 
+            _httpContextAccessor.SetContextUser(user);
+
             await Assert.ThrowsAsync<ArgumentException>(async () =>
-                await _target.FollowUser(user, user.Username)
+                await _target.FollowUser(user.Username)
             );
         }
 
@@ -134,8 +151,10 @@ namespace Bulliten.API.Tests.Services
 
             UserAccount user = _context.UserAccounts.Find(testUser.ID);
 
+            _httpContextAccessor.SetContextUser(user);
+
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.FollowUser(user, "NonExistingUsername")
+                _target.FollowUser("NonExistingUsername")
             );
         }
 
@@ -157,8 +176,10 @@ namespace Bulliten.API.Tests.Services
             UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
             UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
+            _httpContextAccessor.SetContextUser(user1);
+
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.FollowUser(user1, user2.Username)
+                _target.FollowUser(user2.Username)
             );
         }
         #endregion
@@ -182,7 +203,9 @@ namespace Bulliten.API.Tests.Services
             UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
             UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
-            await _target.UnfollowUser(user1, user2.Username);
+            _httpContextAccessor.SetContextUser(user1);
+
+            await _target.UnfollowUser(user2.Username);
 
             Assert.Empty(user2.Followers);
             Assert.Empty(_context.FollowerTable.ToList());
@@ -199,8 +222,10 @@ namespace Bulliten.API.Tests.Services
 
             UserAccount user1 = _context.UserAccounts.Find(testUser.ID);
 
+            _httpContextAccessor.SetContextUser(user1);
+
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.UnfollowUser(user1, user1.Username)
+                _target.UnfollowUser(user1.Username)
             );
         }
 
@@ -215,8 +240,10 @@ namespace Bulliten.API.Tests.Services
 
             UserAccount user1 = _context.UserAccounts.Find(testUser.ID);
 
+            _httpContextAccessor.SetContextUser(user1);
+
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.UnfollowUser(user1, "NonExistingUsername")
+                _target.UnfollowUser("NonExistingUsername")
             );
         }
 
@@ -232,8 +259,10 @@ namespace Bulliten.API.Tests.Services
             UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
             UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
+            _httpContextAccessor.SetContextUser(user1);
+
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.UnfollowUser(user1, user2.Username)
+                _target.UnfollowUser(user2.Username)
             );
         }
         #endregion
@@ -308,7 +337,9 @@ namespace Bulliten.API.Tests.Services
             UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
             UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
-            Assert.True(await _target.UserIsFollowing(user1, user2.Username));
+            _httpContextAccessor.SetContextUser(user1);
+
+            Assert.True(await _target.UserIsFollowing(user2.Username));
         }
 
         [Fact]
@@ -323,7 +354,7 @@ namespace Bulliten.API.Tests.Services
             UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
             UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
-            Assert.False(await _target.UserIsFollowing(user1, user2.Username));
+            Assert.False(await _target.UserIsFollowing(user2.Username));
         }
         #endregion
 
