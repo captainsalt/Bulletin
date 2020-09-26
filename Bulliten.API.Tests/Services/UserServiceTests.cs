@@ -1,6 +1,7 @@
 using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
+using Bulliten.API.Tests.Helpers;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
@@ -8,14 +9,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Sdk;
+using static Bulliten.API.Tests.Helpers.BullitenDBContextExtensions;
 
 namespace Bulliten.API.Tests.Services
 {
     public class UserServiceTests : IDisposable
     {
         private readonly UserAccountService _target;
-        private readonly List<UserAccount> _testAccounts;
         private readonly BullitenDBContext _context;
 
         public UserServiceTests()
@@ -25,12 +25,6 @@ namespace Bulliten.API.Tests.Services
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(m => m["Secret"]).Returns("SecretTestSTring");
 
-            _testAccounts = new List<UserAccount>
-            {
-                new UserAccount { Username = "user1", Password = "Test" },
-                new UserAccount { Username = "user2", Password = "Test" }
-            };
-
             _target = new UserAccountService(_context, new AuthenticationService(configMock.Object, _context));
         }
 
@@ -38,7 +32,8 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task CreateAccount_AddsUserToDababase()
         {
-            await _target.CreateAccount(_testAccounts[0]);
+            UserAccount testAccount = GenerateUserAccounts(1).First();
+            await _target.CreateAccount(testAccount);
 
             Assert.NotNull(_context.UserAccounts.ToList());
         }
@@ -46,10 +41,14 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task CreateAccount_Throws_IfAccountUsernameExists()
         {
-            await _target.CreateAccount(_testAccounts[0]);
+            UserAccount testAccount = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testAccount);
+            });
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.CreateAccount(_testAccounts[0])
+                _target.CreateAccount(testAccount)
             );
         }
         #endregion
@@ -58,8 +57,13 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task Login_ReturnsCredentials()
         {
-            await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse response = await _target.Login(_testAccounts[0]);
+            UserAccount testAccount = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testAccount);
+            });
+
+            AuthenticationResponse response = await _target.Login(testAccount);
 
             Assert.NotNull(response.User);
             Assert.NotNull(response.Token);
@@ -68,11 +72,16 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task Login_Throws_IfInvalidCredentials()
         {
-            await _target.CreateAccount(_testAccounts[0]);
-            _testAccounts[0].Password = "WrongPassword";
+            UserAccount testAccount = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testAccount);
+            });
+
+            testAccount.Password = "WrongPassword";
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.Login(_testAccounts[0])
+                _target.Login(testAccount)
             );
         }
         #endregion
@@ -81,13 +90,16 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task FollowUser_AddsFollowRecordToDatabase()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+            IEnumerable<UserAccount> users = GenerateUserAccounts(2);
+            _context.Setup(context =>
+            {
+                context.UserAccounts.AddRange(users);
+            });
 
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
-            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+            UserAccount user1 = _context.UserAccounts.Find(users.First().ID);
+            UserAccount user2 = _context.UserAccounts.Find(users.Last().ID);
 
-            await _target.FollowUser(auth1.User, user2.Username);
+            await _target.FollowUser(user1, user2.Username);
 
             FollowRecord followRecord = _context.FollowerTable.First();
 
@@ -98,8 +110,13 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task FollowUser_Throws_IfRequestToFollowSelf()
         {
-            AuthenticationResponse auth = await _target.CreateAccount(_testAccounts[0]);
-            UserAccount user = _context.UserAccounts.Find(auth.User.ID);
+            UserAccount testUser = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testUser);
+            });
+
+            UserAccount user = _context.UserAccounts.Find(testUser.ID);
 
             await Assert.ThrowsAsync<ArgumentException>(async () =>
                 await _target.FollowUser(user, user.Username)
@@ -109,8 +126,13 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task FollowUser_Throws_IfUserDoesNotExist()
         {
-            AuthenticationResponse auth = await _target.CreateAccount(_testAccounts[0]);
-            UserAccount user = _context.UserAccounts.Find(auth.User.ID);
+            UserAccount testUser = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testUser);
+            });
+
+            UserAccount user = _context.UserAccounts.Find(testUser.ID);
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.FollowUser(user, "NonExistingUsername")
@@ -120,16 +142,23 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task FollowUser_Throws_IfAlreadyFollowing()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+            IEnumerable<UserAccount> testUsers = GenerateUserAccounts(2);
+            _context.Setup(context =>
+            {
+                context.UserAccounts.AddRange(testUsers);
 
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
-            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+                context.FollowerTable.Add(new FollowRecord
+                {
+                    Follower = testUsers.First(),
+                    Followee = testUsers.Last()
+                });
+            });
 
-            await _target.FollowUser(auth1.User, user2.Username);
+            UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
+            UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.FollowUser(auth1.User, user2.Username)
+                _target.FollowUser(user1, user2.Username)
             );
         }
         #endregion
@@ -138,37 +167,53 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task UnfollowUser_RemovesFollowRecordFromDatabase()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+            IEnumerable<UserAccount> testUsers = GenerateUserAccounts(2);
+            _context.Setup(context =>
+            {
+                context.UserAccounts.AddRange(testUsers);
 
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
-            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+                context.FollowerTable.Add(new FollowRecord
+                {
+                    Follower = testUsers.First(),
+                    Followee = testUsers.Last()
+                });
+            });
 
-            _context.FollowerTable.Add(new FollowRecord { Followee = user2, Follower = user1 });
+            UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
+            UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
             await _target.UnfollowUser(user1, user2.Username);
 
             Assert.Empty(user2.Followers);
+            Assert.Empty(_context.FollowerTable.ToList());
         }
 
         [Fact]
         public async Task UnfollowUser_Throws_IfRequestToUnfollowSelf()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+            UserAccount testUser = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testUser);
+            });
 
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+            UserAccount user1 = _context.UserAccounts.Find(testUser.ID);
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.UnfollowUser(user1, user1.Username)
-             );
+            );
         }
 
         [Fact]
         public async Task UnfollowUser_Throws_IfUserDoesNotExist()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+            UserAccount testUser = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testUser);
+            });
 
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+            UserAccount user1 = _context.UserAccounts.Find(testUser.ID);
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.UnfollowUser(user1, "NonExistingUsername")
@@ -178,11 +223,14 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task UnfollowUser_Throws_IfNotFollowing()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+            IEnumerable<UserAccount> testUsers = GenerateUserAccounts(2);
+            _context.Setup(context =>
+            {
+                context.UserAccounts.AddRange(testUsers);
+            });
 
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
-            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+            UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
+            UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.UnfollowUser(user1, user2.Username)
@@ -194,17 +242,25 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetUserByUsername_RetreivesUserFromDatabase()
         {
-            await _target.CreateAccount(_testAccounts[0]);
-            UserAccount user = await _target.GetUserByUsername(_testAccounts[0].Username);
+            UserAccount testUser = GenerateUserAccounts(1).First();
+            _context.Setup(context =>
+            {
+                context.UserAccounts.Add(testUser);
+            });
 
-            Assert.Equal(_testAccounts[0].Username, user.Username);
+            UserAccount user = await _target.GetUserByUsername(testUser.Username);
+
+            Assert.Equal(testUser.Username, user.Username);
+            Assert.Equal(testUser.ID, user.ID);
         }
 
         [Fact]
         public async Task GetUserByUsername_Throws_IfUserDoesNotExist()
         {
+            var testAccount = GenerateUserAccounts(1).First();
+
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.GetUserByUsername(_testAccounts[0].Username)
+                _target.GetUserByUsername(testAccount.Username)
             );
         }
         #endregion
@@ -213,23 +269,23 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetFollowInfo_Returns_CorrectInformation()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
-
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
-            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
-
-            Assert.Equal((followingCount: 0, followerCount: 0), await _target.GetFollowInfo(user1.Username));
-
-            _context.FollowerTable.Add(new FollowRecord
+            IEnumerable<UserAccount> testUsers = GenerateUserAccounts(2);
+            _context.Setup(context =>
             {
-                Followee = user2,
-                Follower = user1
+                context.UserAccounts.AddRange(testUsers);
+
+                context.FollowerTable.Add(new FollowRecord
+                {
+                    Follower = testUsers.First(),
+                    Followee = testUsers.Last()
+                });
             });
 
-            _context.SaveChanges();
+            UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
+            UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
             Assert.Equal((followingCount: 1, followerCount: 0), await _target.GetFollowInfo(user1.Username));
+            Assert.Equal((followingCount: 0, followerCount: 1), await _target.GetFollowInfo(user2.Username));
         }
         #endregion
 
@@ -237,19 +293,20 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task UserIsFollowing_Returns_TrueIfFollowing()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
-
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
-            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
-
-            _context.FollowerTable.Add(new FollowRecord
+            IEnumerable<UserAccount> testUsers = GenerateUserAccounts(2);
+            _context.Setup(context =>
             {
-                Followee = user2,
-                Follower = user1
+                context.UserAccounts.AddRange(testUsers);
+
+                context.FollowerTable.Add(new FollowRecord
+                {
+                    Followee = testUsers.Last(),
+                    Follower = testUsers.First()
+                });
             });
 
-            _context.SaveChanges();
+            UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
+            UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
             Assert.True(await _target.UserIsFollowing(user1, user2.Username));
         }
@@ -257,11 +314,14 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task UserIsFollowing_Returns_FalseIfNotFollowing()
         {
-            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
-            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+            IEnumerable<UserAccount> testUsers = GenerateUserAccounts(2);
+            _context.Setup(context =>
+            {
+                context.UserAccounts.AddRange(testUsers);
+            });
 
-            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
-            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+            UserAccount user1 = _context.UserAccounts.Find(testUsers.First().ID);
+            UserAccount user2 = _context.UserAccounts.Find(testUsers.Last().ID);
 
             Assert.False(await _target.UserIsFollowing(user1, user2.Username));
         }

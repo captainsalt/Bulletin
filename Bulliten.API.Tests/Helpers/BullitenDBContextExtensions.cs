@@ -16,11 +16,15 @@ namespace Bulliten.API.Tests.Helpers
 
         public static IEnumerable<UserAccount> GenerateUserAccounts(int count)
         {
+            var list = new List<UserAccount>();
+
             for (int i = 1; i <= count; i++)
             {
                 string username = $"User{i}";
-                yield return new UserAccount { Username = username, Password = "test" };
+                list.Add(new UserAccount { Username = username, Password = "test" });
             }
+
+            return list;
         }
     }
 }
