@@ -257,7 +257,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetUserByUsername_Throws_IfUserDoesNotExist()
         {
-            var testAccount = GenerateUserAccounts(1).First();
+            UserAccount testAccount = GenerateUserAccounts(1).First();
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.GetUserByUsername(testAccount.Username)

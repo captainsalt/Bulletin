@@ -1,8 +1,6 @@
 ﻿using Bulliten.API.Models;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Bulliten.API.Tests.Helpers
 {
