@@ -1,9 +1,12 @@
-﻿using Bulliten.API.Models;
+﻿using Bulliten.API.Middleware;
+using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Services
@@ -12,11 +15,16 @@ namespace Bulliten.API.Services
     {
         private readonly BullitenDBContext _context;
         private readonly IAuthenticationService _authService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserAccountService(BullitenDBContext context, IAuthenticationService authService)
+        public UserAccountService(
+            BullitenDBContext context,
+            IAuthenticationService authService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _authService = authService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<AuthenticationResponse> CreateAccount(UserAccount formAccount)
@@ -59,8 +67,10 @@ namespace Bulliten.API.Services
         /// <param name="ctxUser">User making the request to follow</param>
         /// <param name="username">Username of account being followed</param>
         /// <returns></returns>
-        public async Task FollowUser(UserAccount ctxUser, string username)
+        public async Task FollowUser(string username)
         {
+            UserAccount ctxUser = GetContextUser();
+
             if (ctxUser.Username == username)
                 throw new ArgumentException("Cannot follow yourself");
 
@@ -91,8 +101,10 @@ namespace Bulliten.API.Services
         /// </summary>
         /// <param name="ctxUser">User making the request to unfollow</param>
         /// <param name="username">Username of account being unfollowed</param>
-        public async Task UnfollowUser(UserAccount ctxUser, string username)
+        public async Task UnfollowUser(string username)
         {
+            UserAccount ctxUser = GetContextUser();
+
             if (ctxUser.Username == username)
                 throw new ArgumentException("Cannot unfollow yourself");
 
@@ -138,10 +150,13 @@ namespace Bulliten.API.Services
             return (followingCount, followerCount);
         }
 
-        public async Task<bool> UserIsFollowing(UserAccount ctxUser, string followeeUsername)
+        public async Task<bool> UserIsFollowing(string followeeUsername)
         {
             UserAccount followee = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == followeeUsername);
-            return followee.Followers.Any(u => u.FollowerId == ctxUser.ID);
+            return followee.Followers.Any(u => u.FollowerId == GetContextUser().ID);
         }
+
+        private UserAccount GetContextUser() =>
+            (UserAccount)_httpContextAccessor.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
     }
 }

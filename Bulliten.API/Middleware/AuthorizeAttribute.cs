@@ -1,4 +1,5 @@
 ﻿using Bulliten.API.Models;
+using Bulliten.API.Models.Server;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;

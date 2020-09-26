@@ -8,7 +8,7 @@ namespace Bulliten.API.Services
     {
         Task<AuthenticationResponse> CreateAccount(UserAccount formAccount);
 
-        Task FollowUser(UserAccount ctxUser, string username);
+        Task FollowUser(string username);
 
         Task<(int followingCount, int followerCount)> GetFollowInfo(string username);
 
@@ -16,8 +16,8 @@ namespace Bulliten.API.Services
 
         Task<AuthenticationResponse> Login(UserAccount formAccount);
 
-        Task UnfollowUser(UserAccount ctxUser, string username);
+        Task UnfollowUser(string username);
 
-        Task<bool> UserIsFollowing(UserAccount ctxUser, string followeeUsername);
+        Task<bool> UserIsFollowing(string followeeUsername);
     }
 }

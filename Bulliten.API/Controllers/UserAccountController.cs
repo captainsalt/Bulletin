@@ -42,7 +42,7 @@ namespace Bulliten.API.Controllers
             {
                 UserAccount user = await _userAccountService.GetUserByUsername(username);
                 (int followingCount, int followerCount) = await _userAccountService.GetFollowInfo(username);
-                bool isFollowing = await _userAccountService.UserIsFollowing(GetAccountFromContext(), username);
+                bool isFollowing = await _userAccountService.UserIsFollowing(username);
 
                 return Ok(new
                 {
@@ -64,7 +64,7 @@ namespace Bulliten.API.Controllers
         {
             try
             {
-                await _userAccountService.FollowUser(GetAccountFromContext(), username);
+                await _userAccountService.FollowUser(username);
                 return Ok();
             }
             catch (Exception ex)
@@ -79,7 +79,7 @@ namespace Bulliten.API.Controllers
         {
             try
             {
-                await _userAccountService.UnfollowUser(GetAccountFromContext(), username);
+                await _userAccountService.UnfollowUser(username);
                 return Ok();
             }
             catch (Exception ex)
