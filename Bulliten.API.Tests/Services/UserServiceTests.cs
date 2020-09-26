@@ -30,7 +30,7 @@ namespace Bulliten.API.Tests.Services
 
         #region CreateAccount
         [Fact]
-        public async Task CreateAccount_AddsUserToDababase()
+        public async Task CreateAccount_Adds_UserToDababase()
         {
             UserAccount testAccount = GenerateUserAccounts(1).First();
             await _target.CreateAccount(testAccount);
@@ -55,7 +55,7 @@ namespace Bulliten.API.Tests.Services
 
         #region Login
         [Fact]
-        public async Task Login_ReturnsCredentials()
+        public async Task Login_Returns_Credentials()
         {
             UserAccount testAccount = GenerateUserAccounts(1).First();
             _context.Setup(context =>
@@ -88,7 +88,7 @@ namespace Bulliten.API.Tests.Services
 
         #region FollowUser
         [Fact]
-        public async Task FollowUser_AddsFollowRecordToDatabase()
+        public async Task FollowUser_Adds_FollowRecordToDatabase()
         {
             IEnumerable<UserAccount> users = GenerateUserAccounts(2);
             _context.Setup(context =>
@@ -165,7 +165,7 @@ namespace Bulliten.API.Tests.Services
 
         #region UnfollowUser
         [Fact]
-        public async Task UnfollowUser_RemovesFollowRecordFromDatabase()
+        public async Task UnfollowUser_Removes_FollowRecordFromDatabase()
         {
             IEnumerable<UserAccount> testUsers = GenerateUserAccounts(2);
             _context.Setup(context =>
@@ -240,7 +240,7 @@ namespace Bulliten.API.Tests.Services
 
         #region GetUserByUsername
         [Fact]
-        public async Task GetUserByUsername_RetreivesUserFromDatabase()
+        public async Task GetUserByUsername_Returns_User()
         {
             UserAccount testUser = GenerateUserAccounts(1).First();
             _context.Setup(context =>
