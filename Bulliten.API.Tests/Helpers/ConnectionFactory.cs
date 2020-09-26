@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 
-namespace Bulliten.API.Tests
+namespace Bulliten.API.Tests.Helpers
 {
     public class ConnectionFactory : IDisposable
     {
