@@ -219,7 +219,7 @@ namespace Bulliten.API.Tests
             UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
             UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
 
-            Assert.Equal((following: 0, followers: 0), await _target.GetFollowInfo(user1.Username));
+            Assert.Equal((followingCount: 0, followerCount: 0), await _target.GetFollowInfo(user1.Username));
 
             _context.FollowerTable.Add(new FollowRecord
             {
@@ -229,7 +229,7 @@ namespace Bulliten.API.Tests
 
             _context.SaveChanges();
 
-            Assert.Equal((following: 1, followers: 0), await _target.GetFollowInfo(user1.Username));
+            Assert.Equal((followingCount: 1, followerCount: 0), await _target.GetFollowInfo(user1.Username));
         }
         #endregion
 
