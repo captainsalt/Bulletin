@@ -140,8 +140,8 @@ namespace Bulliten.API.Services
 
         public async Task<bool> UserIsFollowing(UserAccount ctxUser, string followeeUsername)
         {
-            var followee = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == followeeUsername);
-            return followee.Followers.Any(u => u.ID == ctxUser.ID);
+            UserAccount followee = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == followeeUsername);
+            return followee.Followers.Any(u => u.FollowerId == ctxUser.ID);
         }
     }
 }

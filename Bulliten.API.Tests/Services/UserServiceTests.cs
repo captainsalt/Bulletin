@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Bulliten.API.Tests
 {
@@ -205,6 +206,64 @@ namespace Bulliten.API.Tests
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.GetUserByUsername(_testAccounts[0].Username)
             );
+        }
+        #endregion
+
+        #region GetFollowInfo
+        [Fact]
+        public async Task GetFollowInfo_Returns_CorrectInformation()
+        {
+            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+
+            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+
+            Assert.Equal((following: 0, followers: 0), await _target.GetFollowInfo(user1.Username));
+
+            _context.FollowerTable.Add(new FollowRecord
+            {
+                Followee = user2,
+                Follower = user1
+            });
+
+            _context.SaveChanges();
+
+            Assert.Equal((following: 1, followers: 0), await _target.GetFollowInfo(user1.Username));
+        }
+        #endregion
+
+        #region UserIsFollowing 
+        [Fact]
+        public async Task UserIsFollowing_Returns_TrueIfFollowing()
+        {
+            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+
+            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+
+            _context.FollowerTable.Add(new FollowRecord
+            {
+                Followee = user2,
+                Follower = user1
+            });
+
+            _context.SaveChanges();
+
+            Assert.True(await _target.UserIsFollowing(user1, user2.Username));
+        }
+
+        [Fact]
+        public async Task UserIsFollowing_Returns_FalseIfNotFollowing()
+        {
+            AuthenticationResponse auth1 = await _target.CreateAccount(_testAccounts[0]);
+            AuthenticationResponse auth2 = await _target.CreateAccount(_testAccounts[1]);
+
+            UserAccount user1 = _context.UserAccounts.Find(auth1.User.ID);
+            UserAccount user2 = _context.UserAccounts.Find(auth2.User.ID);
+
+            Assert.False(await _target.UserIsFollowing(user1, user2.Username));
         }
         #endregion
 
