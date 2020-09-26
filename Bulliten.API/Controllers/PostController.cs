@@ -1,4 +1,6 @@
-﻿using Bulliten.API.Models;
+﻿using Bulliten.API.Middleware;
+using Bulliten.API.Models;
+using Bulliten.API.Models.Server;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

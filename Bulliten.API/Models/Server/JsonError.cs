@@ -1,4 +1,4 @@
-﻿namespace Bulliten.API.Models
+﻿namespace Bulliten.API.Models.Server
 {
     public class JsonError
     {

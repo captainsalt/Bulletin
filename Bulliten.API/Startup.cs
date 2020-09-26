@@ -1,3 +1,4 @@
+using Bulliten.API.Middleware;
 using Bulliten.API.Services;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Builder;
