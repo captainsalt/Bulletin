@@ -94,20 +94,15 @@ namespace Bulliten.API.Controllers
         [HttpPost("repost")]
         public async Task<IActionResult> RePost(int postId)
         {
-            return await ActOnPost(
-                postId,
-                new List<string> { "RePosts" },
-                (post, user) =>
-                {
-                    if (user.RePosts.Any(ur => ur.PostId == post.ID))
-                        return BadRequest(new JsonError("Cannot repost a post you already reposted"));
-
-                    user.RePosts.Add(new UserRepost { Post = post, User = user });
-                    post.RePosts++;
-
-                    return Ok();
-                }
-            );
+            try
+            {
+                await _postService.RePost(postId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("unrepost")]

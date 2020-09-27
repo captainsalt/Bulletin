@@ -111,8 +111,27 @@ namespace Bulliten.API.Services
                     UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
                     bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
 
+
                     if (likeWasRemoved)
                         post.Likes--;
+                    else
+                        throw new ArgumentException("Cannot unlike a post you did not like");
+                }
+            );
+        }
+
+        public async Task RePost(int postId)
+        {
+            await ActOnPost(
+                postId,
+                new List<string> { "RePosts" },
+                (post, user) =>
+                {
+                    if (user.RePosts.Any(ur => ur.PostId == post.ID))
+                        throw new ArgumentException("Cannot repost a post you already reposted");
+
+                    user.RePosts.Add(new UserRepost { Post = post, User = user });
+                    post.RePosts++;
                 }
             );
         }

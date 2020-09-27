@@ -69,7 +69,6 @@ namespace Bulliten.API.Tests.Services
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
-
                     Post userPost = GenerateRandomPosts(1).First();
 
                     user.Posts.Add(userPost);
@@ -93,7 +92,6 @@ namespace Bulliten.API.Tests.Services
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
-
                     Post user1Post = GenerateRandomPosts(1).First();
 
                     user.Posts.Add(user1Post);
@@ -116,7 +114,6 @@ namespace Bulliten.API.Tests.Services
                 {
                     UserAccount user1 = _context.GetUserById(1);
                     UserAccount user2 = _context.GetUserById(2);
-
                     Post user2Post = GenerateRandomPosts(1).First();
 
                     user2.Posts.Add(user2Post);
@@ -145,7 +142,6 @@ namespace Bulliten.API.Tests.Services
                 {
                     UserAccount user1 = _context.GetUserById(1);
                     UserAccount user2 = _context.GetUserById(2);
-
                     Post user2Post = GenerateRandomPosts(1).First();
 
                     user2.Posts.Add(user2Post);
@@ -175,7 +171,6 @@ namespace Bulliten.API.Tests.Services
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
-
                     Post user1Post = GenerateRandomPosts(1).First();
 
                     user.Posts.Add(user1Post);
@@ -199,7 +194,6 @@ namespace Bulliten.API.Tests.Services
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
-
                     Post post = GenerateRandomPosts(1).First();
 
                     user.Posts.Add(post);
@@ -229,7 +223,6 @@ namespace Bulliten.API.Tests.Services
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
-
                     Post userPost = GenerateRandomPosts(1).First();
 
                     user.Posts.Add(userPost);
@@ -259,7 +252,6 @@ namespace Bulliten.API.Tests.Services
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
-
                     Post userPost = GenerateRandomPosts(1).First();
 
                     user.Posts.Add(userPost);
@@ -271,6 +263,58 @@ namespace Bulliten.API.Tests.Services
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.RemoveLike(1)
+            );
+        }
+        #endregion
+
+        #region RePost
+        [Fact]
+        public async Task RePost_Adds_PostToDatabase()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await _target.RePost(1);
+
+            var reposts = _context.UserReposts.ToList();
+
+            Assert.Single(reposts);
+        }
+
+        [Fact]
+        public async Task RePost_Throws_IfPostIsAlreadyRePosted()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+
+                    context.UserReposts.Add(new UserRepost
+                    {
+                        User = user,
+                        Post = userPost
+                    });
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.RePost(1)
             );
         }
         #endregion

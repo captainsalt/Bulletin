@@ -13,5 +13,7 @@ namespace Bulliten.API.Services
         Task LikePost(int postId);
 
         Task RemoveLike(int postId);
+
+        Task RePost(int postId);
     }
 }
