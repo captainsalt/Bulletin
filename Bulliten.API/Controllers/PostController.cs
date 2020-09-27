@@ -144,55 +144,5 @@ namespace Bulliten.API.Controllers
                 return Problem("An internal server error has occured");
             }
         }
-
-        private UserAccount GetAccountFromContext() =>
-            (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
-
-        /// <summary>
-        /// Applies the passed in function delegate parameter to a specific post
-        /// </summary>
-        /// <param name="postId">Id of the post to apply the function delegate to</param>
-        /// <param name="includeProps">Dependent properties to load from the database for the <see cref="UserAccount"/> object in the function delegate</param>
-        /// <param name="funcDelegate">The method applied to the post parameter</param>
-        /// <returns></returns>
-        private async Task<IActionResult> ActOnPost(
-            int postId,
-            IEnumerable<string> includeProps,
-            Func<Post, UserAccount, IActionResult> funcDelegate)
-        {
-            Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
-
-            if (post == null) return BadRequest(new JsonError("Post with provided ID does not exist"));
-
-            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.ID == GetAccountFromContext().ID);
-
-            foreach (string propName in includeProps)
-                await _context.Entry(user).Collection(propName).LoadAsync();
-
-            IActionResult result = funcDelegate(post, user);
-
-            await _context.SaveChangesAsync();
-
-            return result;
-        }
-
-        /// <summary>
-        /// Adds the passed in filters to a post query 
-        /// </summary>
-        /// <param name="filters">The filters to be applied to the query</param>
-        /// <returns></returns>
-        private async Task<IEnumerable<Post>> QueryPosts(Func<IQueryable<Post>, IQueryable<Post>> filters)
-        {
-            IQueryable<Post> query = _context.Posts
-                .AsNoTracking()
-                .Include(p => p.Author)
-                .Include(p => p.LikedBy)
-                .Include(p => p.RepostedBy)
-                .AsQueryable();
-
-            IQueryable<Post> newQuery = filters(query);
-
-            return await newQuery.ToListAsync();
-        }
     }
 }
