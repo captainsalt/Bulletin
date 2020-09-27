@@ -6,6 +6,8 @@ namespace Bulliten.API.Services
 {
     public interface IPostService
     {
+        Task CreatePost(Post formPost);
+
         Task<IEnumerable<Post>> GetPersonalFeed();
 
         Task<IEnumerable<Post>> GetPublicFeed(string username);

@@ -367,9 +367,28 @@ namespace Bulliten.API.Tests.Services
 
             var reposts = _context.UserReposts.ToList();
 
-            await Assert.ThrowsAsync<ArgumentException>(() => 
+            await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.RemoveRePost(1)
             );
+        }
+        #endregion
+
+        #region CreatePost 
+        [Fact]
+        public async Task CreatePost_Adds_PostToDatabase()
+        {
+            _context.AddRandomUsers(1);
+
+            UserAccount contextUser = _context.GetUserById(1);
+            Post post = GenerateRandomPosts(1).First();
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await _target.CreatePost(post);
+
+            var posts = _context.Posts.ToList();
+
+            Assert.Single(posts);
         }
         #endregion
     }

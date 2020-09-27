@@ -120,15 +120,17 @@ namespace Bulliten.API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task CreatePost([FromForm] Post formPost)
+        public async Task<IActionResult> CreatePost([FromForm] Post formPost)
         {
-            UserAccount dbUser = await _context.UserAccounts.SingleAsync(u => u.ID == GetAccountFromContext().ID);
-
-            dbUser.Posts.Add(formPost);
-
-            await _context.SaveChangesAsync();
-
-            Ok();
+            try
+            {
+                await _postService.CreatePost(formPost);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         private IActionResult HandleException(Exception ex)

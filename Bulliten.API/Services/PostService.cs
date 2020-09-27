@@ -154,6 +154,15 @@ namespace Bulliten.API.Services
             );
         }
 
+        public async Task CreatePost(Post formPost)
+        {
+            UserAccount dbUser = _context.UserAccounts.Find(GetContextUser().ID);
+
+            dbUser.Posts.Add(formPost);
+
+            await _context.SaveChangesAsync();
+        }
+
         private UserAccount GetContextUser() =>
             (UserAccount)_httpContextAccessor.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 
