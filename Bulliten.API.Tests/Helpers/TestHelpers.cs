@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Bulliten.API.Tests.Helpers
 {
@@ -15,6 +16,40 @@ namespace Bulliten.API.Tests.Helpers
             action.Invoke(context);
             context.SaveChanges();
         }
+    
+        public static BullitenDBContext FollowUser(this BullitenDBContext context, UserAccount follower, UserAccount followee)
+        {
+            context.FollowerTable.Add(new FollowRecord
+            {
+                Follower = follower,
+                Followee = followee
+            });
+
+            return context;
+        }
+
+        public static BullitenDBContext AddRandomUsers(this BullitenDBContext context, int quantity)
+        {
+            var list = new List<UserAccount>();
+
+            for (int i = 1; i <= quantity; i++)
+            {
+                string username = $"User{i}";
+                list.Add(new UserAccount { Username = username, Password = "test" });
+            }
+
+            context.UserAccounts.AddRange(list);
+            return context;
+        }
+
+        public static BullitenDBContext AddUsers(this BullitenDBContext context, params UserAccount[] users)
+        {
+            context.UserAccounts.AddRange(users);
+            return context;
+        }
+
+        public static UserAccount GetUserById(this BullitenDBContext context, int id) => 
+            context.UserAccounts.Find(id);
 
         public static void SetContextUser(this IHttpContextAccessor accessor, UserAccount user) => 
             accessor.HttpContext.Items[JwtMiddleware.CONTEXT_USER] = user;
