@@ -31,7 +31,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetPublicFeed_Returns_RepostedPosts()
         {
-            _context.AddRandomUsers(2)
+            _context.AddUsers(2)
                 .Setup(context =>
                 {
                     UserAccount user1 = _context.GetUserById(1);
@@ -60,7 +60,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetPublicFeed_Returns_OwnPosts()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -83,7 +83,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetPersonalFeed_Returns_OwnPosts()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -104,7 +104,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetPersonalFeed_Returns_FolloweePosts()
         {
-            _context.AddRandomUsers(2)
+            _context.AddUsers(2)
                 .Setup(context =>
                 {
                     UserAccount user1 = _context.GetUserById(1);
@@ -132,7 +132,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task GetPersonalFeed_Returns_RepostedPosts()
         {
-            _context.AddRandomUsers(2)
+            _context.AddUsers(2)
                 .Setup(context =>
                 {
                     UserAccount user1 = _context.GetUserById(1);
@@ -162,7 +162,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task LikePost_Adds_LikeToDatabase()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -185,7 +185,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task LikePost_Throws_IfPostAlreadyLiked()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -214,7 +214,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task RemoveLike_Removes_LikeFromDatabase()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -243,7 +243,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task RemoveLike_Throws_IfPostIsNotLiked()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -266,7 +266,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task RePost_Adds_PostToDatabase()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -289,7 +289,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task RePost_Throws_IfPostIsAlreadyRePosted()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -318,7 +318,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task RemoveRePost_Removes_RePostFromDatabase()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -347,7 +347,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task RemoveRePost_Throws_IfPostIsNotRePosted()
         {
-            _context.AddRandomUsers(1)
+            _context.AddUsers(1)
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
@@ -372,7 +372,7 @@ namespace Bulliten.API.Tests.Services
         [Fact]
         public async Task CreatePost_Adds_PostToDatabase()
         {
-            _context.AddRandomUsers(1);
+            _context.AddUsers(1);
 
             UserAccount contextUser = _context.GetUserById(1);
             Post post = GenerateRandomPosts(1).First();

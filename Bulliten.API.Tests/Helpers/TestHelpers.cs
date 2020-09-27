@@ -14,7 +14,7 @@ namespace Bulliten.API.Tests.Helpers
             context.SaveChanges();
         }
 
-        public static BullitenDBContext AddRandomUsers(this BullitenDBContext context, int quantity)
+        public static BullitenDBContext AddUsers(this BullitenDBContext context, int quantity)
         {
             var list = new List<UserAccount>();
 
