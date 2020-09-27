@@ -1,15 +1,10 @@
-﻿using Bulliten.API.Middleware;
-using Bulliten.API.Models;
-using Bulliten.API.Models.Authentication;
+﻿using Bulliten.API.Models;
 using Bulliten.API.Services;
 using Bulliten.API.Tests.Helpers;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Xunit;
 using static Bulliten.API.Tests.Helpers.TestHelpers;
@@ -18,9 +13,9 @@ namespace Bulliten.API.Tests.Services
 {
     public class PostServiceTests
     {
-        private BullitenDBContext _context;
-        private IHttpContextAccessor _httpContextAccessor;
-        private PostService _target;
+        private readonly BullitenDBContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly PostService _target;
 
         public PostServiceTests()
         {

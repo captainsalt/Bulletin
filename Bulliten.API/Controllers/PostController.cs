@@ -2,7 +2,6 @@
 using Bulliten.API.Models;
 using Bulliten.API.Models.Server;
 using Bulliten.API.Services;
-using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -54,7 +53,7 @@ namespace Bulliten.API.Controllers
         {
             try
             {
-                var posts = await _postService.GetPersonalFeed();
+                IEnumerable<Post> posts = await _postService.GetPersonalFeed();
                 return Ok(posts);
             }
             catch (Exception ex)
@@ -71,7 +70,7 @@ namespace Bulliten.API.Controllers
                 await _postService.LikePost(postId);
                 return Ok();
             }
-            catch (Exception ex)   
+            catch (Exception ex)
             {
                 return HandleException(ex);
             }
@@ -82,7 +81,7 @@ namespace Bulliten.API.Controllers
         {
             try
             {
-                await _postService.RemoveLike(postId);  
+                await _postService.RemoveLike(postId);
                 return Ok();
             }
             catch (Exception ex)

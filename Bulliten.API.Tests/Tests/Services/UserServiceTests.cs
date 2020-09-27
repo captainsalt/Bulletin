@@ -1,11 +1,8 @@
-using Bulliten.API.Middleware;
 using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
 using Bulliten.API.Tests.Helpers;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +46,7 @@ namespace Bulliten.API.Tests.Services
         public async Task CreateAccount_Returns_Credentials()
         {
             UserAccount testAccount = GenerateUserAccounts(1).First();
-            var response = await _target.CreateAccount(testAccount);
+            AuthenticationResponse response = await _target.CreateAccount(testAccount);
 
             Assert.Equal(testAccount.Username, response.User.Username);
         }
