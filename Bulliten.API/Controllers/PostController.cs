@@ -73,7 +73,7 @@ namespace Bulliten.API.Controllers
             }
         }
 
-        [HttpPost("unlike")]
+        [HttpDelete("like/remove")]
         public async Task<IActionResult> UnlikePost(int postId)
         {
             try
@@ -101,7 +101,7 @@ namespace Bulliten.API.Controllers
             }
         }
 
-        [HttpPost("unrepost")]
+        [HttpDelete("repost/remove")]
         public async Task<IActionResult> UnRePost(int postId)
         {
             try

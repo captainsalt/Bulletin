@@ -110,7 +110,7 @@ export async function followUser(username: string): Promise<void> {
 }
 
 export async function unfollowUser(username: string): Promise<void> {
-  const response = await fetchRequest("POST", `/user/unfollow?username=${username}`, {
+  const response = await fetchRequest("DELETE", `/user/unfollow?username=${username}`, {
     headers: getAuthHeader()
   });
 
@@ -128,7 +128,7 @@ export async function likePost(postId: number): Promise<void> {
 }
 
 export async function unlikePost(postId: number): Promise<void> {
-  const response = await fetchRequest("POST", `/post/unlike?postId=${postId}`, {
+  const response = await fetchRequest("DELETE", `/post/like/remove?postId=${postId}`, {
     headers: getAuthHeader()
   });
 
@@ -146,7 +146,7 @@ export async function repost(postId: number): Promise<void> {
 }
 
 export async function unRepost(postId: number): Promise<void> {
-  const response = await fetchRequest("POST", `/post/unrepost?postId=${postId}`, {
+  const response = await fetchRequest("DELETE", `/post/repost/remove?postId=${postId}`, {
     headers: getAuthHeader()
   });
 

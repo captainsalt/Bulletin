@@ -72,7 +72,7 @@ namespace Bulliten.API.Controllers
             }
         }
 
-        [HttpPost("unfollow")]
+        [HttpDelete("unfollow")]
         [Authorize]
         public async Task<IActionResult> UnfollowUser([FromQuery] string username)
         {
