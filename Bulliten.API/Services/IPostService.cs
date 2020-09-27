@@ -9,5 +9,9 @@ namespace Bulliten.API.Services
         Task<IEnumerable<Post>> GetPersonalFeed();
 
         Task<IEnumerable<Post>> GetPublicFeed(string username);
+
+        Task LikePost(int postId);
+
+        Task RemoveLike(int postId);
     }
 }

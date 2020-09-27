@@ -166,5 +166,113 @@ namespace Bulliten.API.Tests.Services
             Assert.Single(feed);
         }
         #endregion
+
+        #region LikePost
+        [Fact]
+        public async Task LikePost_Adds_LikeToDatabase()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+
+                    Post user1Post = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(user1Post);
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await _target.LikePost(1);
+
+            var likedPosts = _context.UserLike.ToList();
+
+            Assert.Single(likedPosts);
+        }
+
+        [Fact]
+        public async Task LikePost_Throws_IfPostAlreadyLiked()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+
+                    Post post = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(post);
+
+                    context.UserLike.Add(new UserLike
+                    {
+                        User = user,
+                        Post = post
+                    });
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.LikePost(1)
+            );
+        }
+        #endregion
+
+        #region RemoveLike
+        [Fact]
+        public async Task RemoveLike_Removes_LikeFromDatabase()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+
+                    context.UserLike.Add(new UserLike
+                    {
+                        Post = userPost,
+                        User = user
+                    });
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await _target.RemoveLike(1);
+
+            var likedPosts = _context.UserLike.ToList();
+
+            Assert.Empty(likedPosts);
+        }
+
+        [Fact]
+        public async Task RemoveLike_Throws_IfPostIsNotLiked()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.RemoveLike(1)
+            );
+        }
+        #endregion
     }
 }

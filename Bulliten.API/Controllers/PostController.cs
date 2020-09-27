@@ -66,39 +66,29 @@ namespace Bulliten.API.Controllers
         [HttpPost("like")]
         public async Task<IActionResult> LikePost(int postId)
         {
-            return await ActOnPost(
-                postId,
-                new List<string> { "LikedPosts" },
-                (post, user) =>
-                {
-                    if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
-                        return BadRequest(new JsonError("Cannot like a post you already liked"));
-
-                    user.LikedPosts.Add(new UserLike { Post = post, User = user });
-                    post.Likes++;
-
-                    return Ok();
-                }
-            );
+            try
+            {
+                await _postService.LikePost(postId);
+                return Ok();
+            }
+            catch (Exception ex)   
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("unlike")]
         public async Task<IActionResult> UnlikePost(int postId)
         {
-            return await ActOnPost(
-                postId,
-                new List<string> { "LikedPosts" },
-                (post, user) =>
-                {
-                    UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
-                    bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
-
-                    if (likeWasRemoved)
-                        post.Likes--;
-
-                    return Ok();
-                }
-            );
+            try
+            {
+                await _postService.RemoveLike(postId);  
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("repost")]

@@ -48,7 +48,7 @@ namespace Bulliten.API.Services
 
             return posts;
         }
-     
+
         public async Task<IEnumerable<Post>> GetPersonalFeed()
         {
             UserAccount user = GetContextUser();
@@ -85,6 +85,38 @@ namespace Bulliten.API.Services
             return orderedPosts;
         }
 
+        public async Task LikePost(int postId)
+        {
+            await ActOnPost(
+                postId,
+                new List<string> { "LikedPosts" },
+                (post, user) =>
+                {
+                    if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
+                        throw new ArgumentException("Cannot like a post you already liked");
+
+                    user.LikedPosts.Add(new UserLike { Post = post, User = user });
+                    post.Likes++;
+                }
+            );
+        }
+
+        public async Task RemoveLike(int postId)
+        {
+            await ActOnPost(
+                postId,
+                new List<string> { "LikedPosts" },
+                (post, user) =>
+                {
+                    UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
+                    bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
+
+                    if (likeWasRemoved)
+                        post.Likes--;
+                }
+            );
+        }
+
         private UserAccount GetContextUser() =>
             (UserAccount)_httpContextAccessor.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 
@@ -93,28 +125,28 @@ namespace Bulliten.API.Services
         /// </summary>
         /// <param name="postId">Id of the post to apply the function delegate to</param>
         /// <param name="includeProps">Dependent properties to load from the database for the <see cref="UserAccount"/> object in the function delegate</param>
-        /// <param name="funcDelegate">The method applied to the post parameter</param>
+        /// <param name="action">The method applied to the post parameter</param>
         /// <returns></returns>
-        private async Task<IActionResult> ActOnPost(
+        private async Task ActOnPost(
             int postId,
             IEnumerable<string> includeProps,
-            Func<Post, UserAccount, IActionResult> funcDelegate)
+            Action<Post, UserAccount> action)
         {
             Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
 
             if (post == null)
                 throw new ArgumentException("Post with provided ID does not exist");
 
-            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.ID == GetContextUser().ID);
+            UserAccount user = await _context
+                .UserAccounts
+                .SingleOrDefaultAsync(u => u.ID == GetContextUser().ID);
 
             foreach (string propName in includeProps)
                 await _context.Entry(user).Collection(propName).LoadAsync();
 
-            IActionResult result = funcDelegate(post, user);
+            action(post, user);
 
             await _context.SaveChangesAsync();
-
-            return result;
         }
 
         /// <summary>
