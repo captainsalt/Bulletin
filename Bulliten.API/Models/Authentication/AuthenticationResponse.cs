@@ -2,16 +2,13 @@
 {
     public class AuthenticationResponse
     {
-        public int ID { get; set; }
-
-        public string Username { get; set; }
+        public UserAccount User { get; set; }
 
         public string Token { get; set; }
 
         public AuthenticationResponse(UserAccount user, string token)
         {
-            ID = user.ID;
-            Username = user.Username;
+            User = user;
             Token = token;
         }
     }

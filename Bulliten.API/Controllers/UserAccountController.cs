@@ -1,12 +1,13 @@
-﻿using Bulliten.API.Models;
+﻿using Bulliten.API.Middleware;
+using Bulliten.API.Models;
 using Bulliten.API.Models.Authentication;
+using Bulliten.API.Models.Server;
 using Bulliten.API.Services;
-using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Controllers
@@ -17,16 +18,16 @@ namespace Bulliten.API.Controllers
     {
         private readonly ILogger<UserAccountController> _logger;
         private readonly BullitenDBContext _context;
-        private readonly IAuthenticationService _authService;
+        private readonly IUserAccountService _userAccountService;
 
         public UserAccountController(
             BullitenDBContext context,
             ILogger<UserAccountController> logger,
-            IAuthenticationService accountService)
+            IUserAccountService userAccountService)
         {
             _logger = logger;
             _context = context;
-            _authService = accountService;
+            _userAccountService = userAccountService;
         }
 
         [HttpGet("all")]
@@ -34,132 +35,100 @@ namespace Bulliten.API.Controllers
             await _context.UserAccounts.ToListAsync();
 
         [HttpGet("profile")]
-        public async Task<IActionResult> GetUserByUsername([FromQuery] string username)
+        public async Task<IActionResult> GetUserProfile([FromQuery] string username)
         {
-            UserAccount user = await _context.UserAccounts
-                .Include(u => u.Followers)
-                .SingleOrDefaultAsync(u => u.Username == username);
+            try
+            {
+                UserAccount user = await _userAccountService.GetUserByUsername(username);
+                (int followingCount, int followerCount) = await _userAccountService.GetFollowInfo(username);
+                bool isFollowing = await _userAccountService.UserIsFollowing(username);
 
-            if (user == null)
-                return BadRequest(new Error("User does not exist"));
-
-            int followerCount = await _context.FollowerTable
-                .Where(fr => fr.FolloweeId == user.ID)
-                .CountAsync();
-
-            int followingCount = await _context.FollowerTable
-                .Where(fr => fr.FollowerId == user.ID)
-                .CountAsync();
-
-            UserAccount contextUser = GetAccountFromContext();
-
-            bool isFollowed = user.Followers.Any(fr => fr.FollowerId == contextUser.ID);
-
-            return Ok(new { user, followerCount, followingCount, isFollowed });
+                return Ok(new
+                {
+                    User = user,
+                    followingCount,
+                    followerCount,
+                    isFollowing
+                });
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("follow")]
         [Authorize]
         public async Task<IActionResult> FollowUser([FromQuery] string username)
         {
-            UserAccount ctxUser = GetAccountFromContext();
-
-            if (ctxUser.Username == username)
-                return BadRequest(new Error("Cannot follow yourself"));
-
-            UserAccount targetUser = await _context.UserAccounts
-                .Include(u => u.Followers)
-                .SingleOrDefaultAsync(u => u.Username == username);
-
-            if (targetUser == null)
-                return BadRequest(new Error("User does not exist"));
-
-            FollowRecord followRecord = targetUser.Followers
-                .SingleOrDefault(fr => fr.FollowerId == ctxUser.ID);
-
-            if (followRecord != null)
-                return BadRequest(new Error("Already following"));
-
-            targetUser.Followers.Add(new FollowRecord
+            try
             {
-                Followee = targetUser,
-                Follower = ctxUser,
-            });
-
-            await _context.SaveChangesAsync();
-
-            return Ok();
+                await _userAccountService.FollowUser(username);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("unfollow")]
         [Authorize]
         public async Task<IActionResult> UnfollowUser([FromQuery] string username)
         {
-            UserAccount ctxUser = GetAccountFromContext();
-
-            if (ctxUser.Username == username)
-                return BadRequest(new Error("Cannot unfollow yourself"));
-
-            UserAccount targetUser = await _context.UserAccounts
-                .Include(u => u.Followers)
-                .SingleOrDefaultAsync(u => u.Username == username);
-
-            if (targetUser == null)
-                return BadRequest(new Error("User does not exist"));
-
-            FollowRecord followRecord = targetUser.Followers
-                .SingleOrDefault(fr => fr.FollowerId == ctxUser.ID);
-
-            if (followRecord == null)
+            try
+            {
+                await _userAccountService.UnfollowUser(username);
                 return Ok();
-
-            targetUser.Followers.Remove(followRecord);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccount([FromForm] UserAccount formAccount)
         {
-            bool isInvalidUsername = await _context.UserAccounts.AnyAsync(u => u.Username == formAccount.Username);
-
-            if (isInvalidUsername)
-                return BadRequest(new Error($"Username \"{formAccount.Username}\" is already in use"));
-
-            await _context.UserAccounts.AddAsync(formAccount);
-            await _context.SaveChangesAsync();
-
-            AuthenticationResponse auth = await _authService
-                .Authenticate(new AuthenticationRequest
-                {
-                    Username = formAccount.Username,
-                    Password = formAccount.Password
-                });
-
-            return StatusCode(201, new { token = auth.Token, user = formAccount });
+            try
+            {
+                AuthenticationResponse authResponse = await _userAccountService.CreateAccount(formAccount);
+                return Ok(authResponse);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] UserAccount formAccount)
         {
-            UserAccount matchedAccount = await _context.UserAccounts
-                .SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
-
-            if (matchedAccount == null)
-                return BadRequest(new Error("Invalid username or password"));
-
-            AuthenticationResponse auth = await _authService
-                .Authenticate(new AuthenticationRequest
-                {
-                    Username = matchedAccount.Username,
-                    Password = matchedAccount.Password
-                });
-
-            return Ok(new { token = auth.Token, user = matchedAccount });
+            try
+            {
+                AuthenticationResponse authResponse = await _userAccountService.Login(formAccount);
+                return Ok(authResponse);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         private UserAccount GetAccountFromContext() =>
             (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
+
+        private IActionResult HandleException(Exception ex)
+        {
+            if (ex is ArgumentException argEx)
+            {
+                return BadRequest(new JsonError(argEx.Message));
+            }
+            else
+            {
+                _logger.LogCritical(ex, "Internal server error");
+                return Problem("An internal server error has occured");
+            }
+        }
     }
 }
