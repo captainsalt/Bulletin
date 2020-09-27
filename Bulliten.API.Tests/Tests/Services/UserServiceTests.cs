@@ -30,7 +30,7 @@ namespace Bulliten.API.Tests.Services
 
             _target = new UserAccountService(
                 _context,
-                new AuthenticationService(globalMocks.Configuration, _context),
+                globalMocks.AuthenticationService,
                 _httpContextAccessor
             );
         }
@@ -43,6 +43,15 @@ namespace Bulliten.API.Tests.Services
             await _target.CreateAccount(testAccount);
 
             Assert.NotNull(_context.UserAccounts.ToList());
+        }
+
+        [Fact]
+        public async Task CreateAccount_Returns_Credentials()
+        {
+            UserAccount testAccount = GenerateUserAccounts(1).First();
+            var response = await _target.CreateAccount(testAccount);
+
+            Assert.Equal(testAccount.Username, response.User.Username);
         }
 
         [Fact]
@@ -86,6 +95,16 @@ namespace Bulliten.API.Tests.Services
             });
 
             testAccount.Password = "WrongPassword";
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _target.Login(testAccount)
+            );
+        }
+
+        [Fact]
+        public async Task Login_Throws_IfUserDoesNotExist()
+        {
+            UserAccount testAccount = GenerateUserAccounts(1).First();
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.Login(testAccount)
