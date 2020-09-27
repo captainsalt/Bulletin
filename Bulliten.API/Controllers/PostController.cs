@@ -21,16 +21,13 @@ namespace Bulliten.API.Controllers
     public class PostController : ControllerBase
     {
         private readonly ILogger<PostController> _logger;
-        private readonly BullitenDBContext _context;
         private readonly IPostService _postService;
 
         public PostController(
             ILogger<PostController> logger,
-            BullitenDBContext context,
             IPostService postService)
         {
             _logger = logger;
-            _context = context;
             _postService = postService;
         }
 
