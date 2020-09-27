@@ -26,6 +26,7 @@ namespace Bulliten.API
             services.AddHttpContextAccessor();
             services.AddDbContext<BullitenDBContext>(options => options.UseNpgsql(Configuration.GetConnectionString("postgres")));
             services.AddTransient<IAuthenticationService, AuthenticationService>();
+            services.AddTransient<IPostService, PostService>();
             services.AddTransient<IUserAccountService, UserAccountService>();
         }
 
