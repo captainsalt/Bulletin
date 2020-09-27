@@ -318,5 +318,59 @@ namespace Bulliten.API.Tests.Services
             );
         }
         #endregion
+
+        #region RemoveRepost
+        [Fact]
+        public async Task RemoveRePost_Removes_RePostFromDatabase()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+
+                    context.UserReposts.Add(new UserRepost
+                    {
+                        User = user,
+                        Post = userPost
+                    });
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await _target.RemoveRePost(1);
+
+            var reposts = _context.UserReposts.ToList();
+
+            Assert.Empty(reposts);
+        }
+
+        [Fact]
+        public async Task RemoveRePost_Throws_IfPostIsNotRePosted()
+        {
+            _context.AddRandomUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            var reposts = _context.UserReposts.ToList();
+
+            await Assert.ThrowsAsync<ArgumentException>(() => 
+                _target.RemoveRePost(1)
+            );
+        }
+        #endregion
     }
 }

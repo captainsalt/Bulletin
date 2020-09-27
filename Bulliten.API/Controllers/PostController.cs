@@ -108,20 +108,15 @@ namespace Bulliten.API.Controllers
         [HttpPost("unrepost")]
         public async Task<IActionResult> UnRePost(int postId)
         {
-            return await ActOnPost(
-                postId,
-                new List<string> { "RePosts" },
-                (post, user) =>
-                {
-                    UserRepost userRepostToRemove = user.RePosts.SingleOrDefault(ur => ur.PostId == post.ID);
-                    bool repostWasRemoved = user.RePosts.Remove(userRepostToRemove);
-
-                    if (repostWasRemoved)
-                        post.RePosts--;
-
-                    return Ok();
-                }
-            );
+            try
+            {
+                await _postService.RemoveRePost(postId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("create")]

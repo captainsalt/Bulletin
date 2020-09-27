@@ -136,6 +136,24 @@ namespace Bulliten.API.Services
             );
         }
 
+        public async Task RemoveRePost(int postId)
+        {
+            await ActOnPost(
+                postId,
+                new List<string> { "RePosts" },
+                (post, user) =>
+                {
+                    UserRepost userRepostToRemove = user.RePosts.SingleOrDefault(ur => ur.PostId == post.ID);
+                    bool repostWasRemoved = user.RePosts.Remove(userRepostToRemove);
+
+                    if (repostWasRemoved)
+                        post.RePosts--;
+                    else
+                        throw new ArgumentException("Cannot unrepost a post you did not repost");
+                }
+            );
+        }
+
         private UserAccount GetContextUser() =>
             (UserAccount)_httpContextAccessor.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 

@@ -14,6 +14,8 @@ namespace Bulliten.API.Services
 
         Task RemoveLike(int postId);
 
+        Task RemoveRePost(int postId);
+
         Task RePost(int postId);
     }
 }
