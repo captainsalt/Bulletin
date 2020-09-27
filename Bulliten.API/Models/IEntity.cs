@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Bulliten.API.Models
 {
-    public interface IEntity<T> : IEqualityComparer<T>
+    public interface IEntity
     {
         public int ID { get; set; }
 

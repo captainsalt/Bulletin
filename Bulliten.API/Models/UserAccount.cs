@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class UserAccount : Entity<UserAccount>
+    public class UserAccount : Entity
     {
-        public UserAccount()
-        {
-            CreationDate = DateTime.UtcNow;
-        }
-
         public string Username { get; set; }
 
         [JsonIgnore]

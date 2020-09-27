@@ -6,13 +6,20 @@ declare interface UserAccount {
 
 declare interface Post {
   id: number;
-  author: IUserAccount;
+  author: UserAccount;
   content: string;
   creationDate: string;
   likes: number;
   likeStatus: boolean;
   rePosts: number;
   rePostStatus: boolean;
+}
+
+declare interface UserProfile {
+  user: UserAccount;
+  followerCount: number;
+  followingCount: number;
+  isFollowed: boolean;
 }
 
 declare interface AuthResponse {

@@ -6,27 +6,19 @@
       </v-alert>
 
       <v-card outlined>
-        <v-card-title>{{ profileUser.username }}</v-card-title>
+        <v-card-title>{{ username }}</v-card-title>
 
         <v-card-actions v-if="!isOwnProfile">
           <v-btn
-            v-if="isFollowing"
             text
-            @click="unfollow"
+            @click="() => { profile.isFollowed ? unfollow() : follow() }"
           >
-            Unfollow
-          </v-btn>
-          <v-btn
-            v-else
-            text
-            @click="follow"
-          >
-            Follow
+            {{ profile.isFollowed ? "Unfollow" : "Follow" }}
           </v-btn>
         </v-card-actions>
 
-        <v-card-text>Followers: {{ followers.length }} </v-card-text>
-        <v-card-text>Following: {{ following.length }} </v-card-text>
+        <v-card-text>Followers: {{ profile.followerCount }} </v-card-text>
+        <v-card-text>Following: {{ profile.followingCount }} </v-card-text>
       </v-card>
     </v-container>
 
@@ -53,12 +45,9 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    profileUser: {} as UserAccount,
+    profile: {} as UserProfile,
     posts: [] as Post[],
-    errorMsg: "",
-    followers: [] as UserAccount[],
-    following: [] as UserAccount[],
-    isFollowing: false
+    errorMsg: ""
   }),
   computed: {
     ...mapState("auth", {
@@ -70,15 +59,11 @@ export default Vue.extend({
   },
   async beforeMount() {
     try {
-      const user = await api.getUser(this.username);
-      const followInfo = await api.getFollowInfo(this.username);
+      const profile = await api.getUserProfile(this.username);
       const posts = await api.getPublicFeed(this.username);
 
-      this.followers = followInfo.followers;
-      this.following = followInfo.following;
-      this.profileUser = user;
+      this.profile = profile;
       this.posts = posts;
-      this.isFollowing = followInfo.followers.some(user => user.id === this.authUser.id);
     }
     catch (error) {
       this.errorMsg = error.message;
@@ -87,7 +72,9 @@ export default Vue.extend({
   methods: {
     async follow() {
       try {
-        await api.followUser(this.profileUser.username);
+        await api.followUser(this.profile.user.username);
+        this.profile.isFollowed = true;
+        this.profile.followerCount++;
       }
       catch (error) {
         this.errorMsg = error.message;
@@ -95,7 +82,9 @@ export default Vue.extend({
     },
     async unfollow() {
       try {
-        await api.unfollowUser(this.profileUser.username);
+        await api.unfollowUser(this.profile.user.username);
+        this.profile.isFollowed = false;
+        this.profile.followerCount--;
       }
       catch (error) {
         this.errorMsg = error.message;

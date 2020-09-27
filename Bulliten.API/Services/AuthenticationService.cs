@@ -39,10 +39,10 @@ namespace Bulliten.API.Services
         private string GenerateJwtToken(UserAccount user)
         {
             // generate token that is valid for 7 days
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            var tokenHandler = new JwtSecurityTokenHandler();
             byte[] key = Encoding.ASCII.GetBytes(_config["Secret"]);
 
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {

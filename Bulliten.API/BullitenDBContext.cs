@@ -1,16 +1,18 @@
 ﻿using Bulliten.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace Bulliten.API
 {
     public class BullitenDBContext : DbContext
     {
-        private readonly IConfiguration _config;
-
-        public BullitenDBContext(IConfiguration config)
+        public BullitenDBContext()
         {
-            _config = config;
+            Database.EnsureCreated();
+        }
+
+        public BullitenDBContext(DbContextOptions optionsBuilder)
+            : base(optionsBuilder)
+        {
             Database.EnsureCreated();
         }
 
@@ -40,8 +42,5 @@ namespace Bulliten.API
             modelBuilder.Entity<UserRepost>()
                 .HasKey(ur => new { ur.UserId, ur.PostId });
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-            optionsBuilder.UseNpgsql(_config.GetConnectionString("postgres"));
     }
 }

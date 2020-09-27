@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Bulliten.API.Utilities
 {
-    public class EntityComparer<T> : IEqualityComparer<T> where T : IEntity<T>
+    public class EntityComparer<T> : IEqualityComparer<T> where T : IEntity
     {
         public bool Equals([AllowNull] T x, [AllowNull] T y) => x?.ID == y?.ID;
 
@@ -13,9 +13,9 @@ namespace Bulliten.API.Utilities
 
     public static class ExtentionsMethods
     {
-        public static IEnumerable<T> NoDuplicates<T>(this IEnumerable<T> entities) where T : IEntity<T>
+        public static IEnumerable<T> NoDuplicates<T>(this IEnumerable<T> entities) where T : IEntity
         {
-            HashSet<T> newList = new HashSet<T>(new EntityComparer<T>());
+            var newList = new HashSet<T>(new EntityComparer<T>());
 
             foreach (T entity in entities)
                 newList.Add(entity);

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
 {
-    public class Post : Entity<Post>
+    public class Post : Entity
     {
         public string Content { get; set; }
 
@@ -37,8 +35,8 @@ namespace Bulliten.API.Models
 
         public void PopulateStatuses(UserAccount user)
         {
-            RePostStatus = RepostedBy.FirstOrDefault(ul => ul.UserId == user.ID) != null;
-            LikeStatus = LikedBy.FirstOrDefault(ul => ul.UserId == user.ID) != null;
+            RePostStatus = RepostedBy.Any(ul => ul.UserId == user.ID);
+            LikeStatus = LikedBy.Any(ul => ul.UserId == user.ID);
         }
     }
 }
