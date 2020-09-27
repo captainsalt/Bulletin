@@ -49,6 +49,41 @@ namespace Bulliten.API.Services
             return posts;
         }
      
+        public async Task<IEnumerable<Post>> GetPersonalFeed()
+        {
+            UserAccount user = GetContextUser();
+
+            IEnumerable<Post> userPosts = await QueryPosts(q =>
+                q.Where(p => p.Author.ID == user.ID));
+
+            IEnumerable<int> userFollowingIds = await _context.FollowerTable
+                .AsNoTracking()
+                .Where(fr => fr.FollowerId == user.ID)
+                .Select(fr => fr.FolloweeId)
+                .ToListAsync();
+
+            IEnumerable<Post> followedUsersPosts = await QueryPosts(q =>
+                q.Where(p => userFollowingIds.Contains(p.Author.ID))
+            );
+
+            IEnumerable<Post> reposted = await QueryPosts(q =>
+                q.Where(p => p.RepostedBy
+                                .Any(ur => ur.UserId == user.ID)
+                )
+            );
+
+            IEnumerable<Post> orderedPosts = userPosts
+                .Concat(followedUsersPosts)
+                .Concat(reposted)
+                .NoDuplicates()
+                .OrderByDescending(p => p.CreationDate);
+
+            orderedPosts
+                .AsParallel()
+                .ForAll(p => p.PopulateStatuses(user));
+
+            return orderedPosts;
+        }
 
         private UserAccount GetContextUser() =>
             (UserAccount)_httpContextAccessor.HttpContext.Items[JwtMiddleware.CONTEXT_USER];

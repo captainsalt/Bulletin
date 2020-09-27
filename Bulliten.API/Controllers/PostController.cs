@@ -26,8 +26,8 @@ namespace Bulliten.API.Controllers
         private readonly IPostService _postService;
 
         public PostController(
-            ILogger<PostController> logger, 
-            BullitenDBContext context, 
+            ILogger<PostController> logger,
+            BullitenDBContext context,
             IPostService postService)
         {
             _logger = logger;
@@ -52,38 +52,15 @@ namespace Bulliten.API.Controllers
         [HttpGet("feed/personal")]
         public async Task<IActionResult> GetPersonalFeed()
         {
-            UserAccount user = GetAccountFromContext();
-
-            IEnumerable<Post> userPosts = await QueryPosts(q =>
-                q.Where(p => p.Author.ID == user.ID));
-
-            IEnumerable<int> userFollowingIds = await _context.FollowerTable
-                .AsNoTracking()
-                .Where(fr => fr.FollowerId == user.ID)
-                .Select(fr => fr.FolloweeId)
-                .ToListAsync();
-
-            IEnumerable<Post> followedUsersPosts = await QueryPosts(q =>
-                q.Where(p => userFollowingIds.Contains(p.Author.ID))
-            );
-
-            IEnumerable<Post> reposted = await QueryPosts(q =>
-                q.Where(p => p.RepostedBy
-                                .Any(ur => ur.UserId == user.ID)
-                )
-            );
-
-            IEnumerable<Post> orderedPosts = userPosts
-                .Concat(followedUsersPosts)
-                .Concat(reposted)
-                .NoDuplicates()
-                .OrderByDescending(p => p.CreationDate);
-
-            orderedPosts
-                .AsParallel()
-                .ForAll(p => p.PopulateStatuses(user));
-
-            return Ok(new { posts = orderedPosts });
+            try
+            {
+                var posts = await _postService.GetPersonalFeed();
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpPost("like")]
