@@ -75,7 +75,7 @@ export async function getPublicFeed(username: string): Promise<Post[]> {
   if (!response.ok)
     throw await getError(response);
 
-  return (await response.json()).posts;
+  return response.json();
 }
 
 export async function getPersonalFeed(): Promise<Post[]> {
@@ -86,7 +86,7 @@ export async function getPersonalFeed(): Promise<Post[]> {
   if (!response.ok)
     throw await getError(response);
 
-  return (await response.json()).posts;
+  return response.json();
 }
 
 export async function getUserProfile(username: string): Promise<UserProfile> {
