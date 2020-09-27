@@ -1,6 +1,7 @@
 ﻿using Bulliten.API.Middleware;
 using Bulliten.API.Models;
 using Bulliten.API.Models.Server;
+using Bulliten.API.Services;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,38 +23,30 @@ namespace Bulliten.API.Controllers
     {
         private readonly ILogger<PostController> _logger;
         private readonly BullitenDBContext _context;
+        private readonly IPostService _postService;
 
-        public PostController(ILogger<PostController> logger, BullitenDBContext context)
+        public PostController(
+            ILogger<PostController> logger, 
+            BullitenDBContext context, 
+            IPostService postService)
         {
             _logger = logger;
             _context = context;
+            _postService = postService;
         }
 
         [HttpGet("feed/public")]
         public async Task<IActionResult> GetPublicFeed([FromQuery] string username)
         {
-            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
-
-            if (user == null)
-                return BadRequest(new JsonError("User does not exist"));
-
-            IEnumerable<Post> userPosts = await QueryPosts(q =>
-                q.Where(p => p.Author.ID == user.ID));
-
-            IEnumerable<Post> reposted = await QueryPosts(q =>
-                q.Where(p => p.RepostedBy.Any(ur => ur.UserId == user.ID)));
-
-            IEnumerable<Post> posts = userPosts
-                .Concat(reposted)
-                .NoDuplicates()
-                .OrderByDescending(p => p.CreationDate)
-                .ToList();
-
-            posts
-                .AsParallel()
-                .ForAll(p => p.PopulateStatuses(GetAccountFromContext()));
-
-            return Ok(new { posts });
+            try
+            {
+                IEnumerable<Post> posts = await _postService.GetPublicFeed(username);
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
         }
 
         [HttpGet("feed/personal")]
@@ -179,6 +172,19 @@ namespace Bulliten.API.Controllers
             await _context.SaveChangesAsync();
 
             Ok();
+        }
+
+        private IActionResult HandleException(Exception ex)
+        {
+            if (ex is ArgumentException argEx)
+            {
+                return BadRequest(new JsonError(argEx.Message));
+            }
+            else
+            {
+                _logger.LogCritical(ex, "Internal server error");
+                return Problem("An internal server error has occured");
+            }
         }
 
         private UserAccount GetAccountFromContext() =>
