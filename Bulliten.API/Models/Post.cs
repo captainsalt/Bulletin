@@ -13,7 +13,16 @@ namespace Bulliten.API.Models
 
         public int RePosts { get; set; }
 
+        public int AuthorId { get; set; }
+
         public UserAccount Author { get; set; }
+
+
+        [JsonIgnore]
+        public ICollection<UserLike> LikedBy { get; set; } = new List<UserLike>();
+
+        [JsonIgnore]
+        public ICollection<UserRepost> RepostedBy { get; set; } = new List<UserRepost>();
 
         /// <summary>
         /// True if post is reposted by the context user
@@ -26,17 +35,5 @@ namespace Bulliten.API.Models
         /// </summary>
         [NotMapped]
         public bool LikeStatus { get; set; }
-
-        [JsonIgnore]
-        public ICollection<UserLike> LikedBy { get; set; } = new List<UserLike>();
-
-        [JsonIgnore]
-        public ICollection<UserRepost> RepostedBy { get; set; } = new List<UserRepost>();
-
-        public void PopulateStatuses(UserAccount user)
-        {
-            RePostStatus = RepostedBy.Any(ul => ul.UserId == user.ID);
-            LikeStatus = LikedBy.Any(ul => ul.UserId == user.ID);
-        }
     }
 }
