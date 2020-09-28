@@ -3,6 +3,7 @@ using Bulliten.API.Models;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,21 +29,19 @@ namespace Bulliten.API.Services
             if (user == null)
                 throw new ArgumentException("User does not exist");
 
-            IEnumerable<Post> userPosts = await QueryPosts(q =>
-                q.Where(p => p.Author.ID == user.ID));
+            IEnumerable<Post> userPosts = user.Posts;
 
-            IEnumerable<Post> reposted = await QueryPosts(q =>
-                q.Where(p => p.RepostedBy.Any(ur => ur.UserId == user.ID)));
+            List<Post> reposted = await _context.UserReposts
+                .AsNoTracking()
+                .Where(ur => ur.UserId == user.ID)
+                .Select(ur => ur.Post)
+                .ToListAsync();
 
             IEnumerable<Post> posts = userPosts
                 .Concat(reposted)
                 .NoDuplicates()
                 .OrderByDescending(p => p.CreationDate)
                 .ToList();
-
-            posts
-                .AsParallel()
-                .ForAll(p => p.PopulateStatuses(GetContextUser()));
 
             return posts;
         }
@@ -51,34 +50,27 @@ namespace Bulliten.API.Services
         {
             UserAccount user = GetContextUser();
 
-            IEnumerable<Post> userPosts = await QueryPosts(q =>
-                q.Where(p => p.Author.ID == user.ID));
+            IEnumerable<Post> userPosts = user.Posts;
 
-            IEnumerable<int> userFollowingIds = await _context.FollowerTable
+            List<Post> followeePosts = await (
+                from fr in _context.FollowerTable.AsNoTracking()
+                where fr.FollowerId == user.ID
+                join p in _context.Posts
+                on fr.FolloweeId equals p.AuthorId
+                select p
+            ).ToListAsync();
+
+            List<Post> reposted = await _context.UserReposts
                 .AsNoTracking()
-                .Where(fr => fr.FollowerId == user.ID)
-                .Select(fr => fr.FolloweeId)
+                .Where(ur => ur.UserId == user.ID)
+                .Select(ur => ur.Post)
                 .ToListAsync();
 
-            IEnumerable<Post> followedUsersPosts = await QueryPosts(q =>
-                q.Where(p => userFollowingIds.Contains(p.Author.ID))
-            );
-
-            IEnumerable<Post> reposted = await QueryPosts(q =>
-                q.Where(p => p.RepostedBy
-                                .Any(ur => ur.UserId == user.ID)
-                )
-            );
-
             IEnumerable<Post> orderedPosts = userPosts
-                .Concat(followedUsersPosts)
+                .Concat(followeePosts)
                 .Concat(reposted)
                 .NoDuplicates()
                 .OrderByDescending(p => p.CreationDate);
-
-            orderedPosts
-                .AsParallel()
-                .ForAll(p => p.PopulateStatuses(user));
 
             return orderedPosts;
         }
@@ -191,25 +183,6 @@ namespace Bulliten.API.Services
             action(post, user);
 
             await _context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Adds the passed in filters to a post query 
-        /// </summary>
-        /// <param name="filters">The filters to be applied to the query</param>
-        /// <returns></returns>
-        private async Task<IEnumerable<Post>> QueryPosts(Func<IQueryable<Post>, IQueryable<Post>> filters)
-        {
-            IQueryable<Post> query = _context.Posts
-                .AsNoTracking()
-                .Include(p => p.Author)
-                .Include(p => p.LikedBy)
-                .Include(p => p.RepostedBy)
-                .AsQueryable();
-
-            IQueryable<Post> newQuery = filters(query);
-
-            return await newQuery.ToListAsync();
         }
     }
 }
