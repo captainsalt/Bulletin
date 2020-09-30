@@ -85,13 +85,15 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                (post, user) =>
+                async (post, user) =>
                 {
                     if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
                         throw new ArgumentException("Cannot like a post you already liked");
 
                     user.LikedPosts.Add(new UserLike { Post = post, User = user });
-                    post.Likes++;
+
+                    int likeCount = await GetPostLikeCount(postId);
+                    post.Likes = likeCount + 1;
                 }
             );
         }
@@ -100,15 +102,20 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                (post, user) =>
+                async (post, user) =>
                 {
                     UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
                     bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
 
                     if (likeWasRemoved)
-                        post.Likes--;
+                    {
+                        int likeCount = await GetPostLikeCount(post.ID);
+                        post.Likes = likeCount - 1;
+                    }
                     else
+                    {
                         throw new ArgumentException("Cannot unlike a post you did not like");
+                    }
                 }
             );
         }
@@ -117,13 +124,15 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                (post, user) =>
+                async (post, user) =>
                 {
                     if (user.RePosts.Any(ur => ur.PostId == post.ID))
                         throw new ArgumentException("Cannot repost a post you already reposted");
 
                     user.RePosts.Add(new UserRepost { Post = post, User = user });
-                    post.RePosts++;
+
+                    int repostCount = await GetPostRePostCount(postId);
+                    post.RePosts = repostCount + 1;
                 }
             );
         }
@@ -132,13 +141,16 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                (post, user) =>
+                async (post, user) =>
                 {
                     UserRepost userRepostToRemove = user.RePosts.SingleOrDefault(ur => ur.PostId == post.ID);
                     bool repostWasRemoved = user.RePosts.Remove(userRepostToRemove);
 
                     if (repostWasRemoved)
-                        post.RePosts--;
+                    {
+                        int repostCount = await GetPostRePostCount(postId);
+                        post.RePosts = repostCount - 1;
+                    }
                     else
                         throw new ArgumentException("Cannot unrepost a post you did not repost");
                 }
@@ -189,20 +201,26 @@ namespace Bulliten.API.Services
         /// <returns></returns>
         private async Task ActOnPost(
             int postId,
-            Action<Post, UserAccount> action)
+            Func<Post, UserAccount, Task> action)
         {
-            Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
+            Post post = await _context.Posts.FindAsync(postId);
 
             if (post == null)
                 throw new ArgumentException("Post with provided ID does not exist");
 
             UserAccount user = await _context
                 .UserAccounts
-                .SingleOrDefaultAsync(u => u.ID == GetContextUser().ID);
+                .FindAsync(GetContextUser().ID);
 
-            action(post, user);
+            await action(post, user);
 
             await _context.SaveChangesAsync();
         }
+
+        private async Task<int> GetPostLikeCount(int postId) =>
+            await _context.UserLike.Where(ul => ul.PostId == postId).CountAsync();
+
+        private async Task<int> GetPostRePostCount(int postId) =>
+            await _context.UserReposts.Where(ur => ur.PostId == postId).CountAsync();
     }
 }
