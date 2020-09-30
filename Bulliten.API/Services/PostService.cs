@@ -3,7 +3,6 @@ using Bulliten.API.Models;
 using Bulliten.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +28,7 @@ namespace Bulliten.API.Services
             if (user == null)
                 throw new ArgumentException("User does not exist");
 
-            IEnumerable<Post> userPosts = user.Posts;
+            IEnumerable<Post> userPosts = user.Posts.ToList();
 
             List<Post> reposted = await _context.UserReposts
                 .AsNoTracking()
@@ -40,21 +39,26 @@ namespace Bulliten.API.Services
             IEnumerable<Post> posts = userPosts
                 .Concat(reposted)
                 .NoDuplicates()
-                .OrderByDescending(p => p.CreationDate)
-                .ToList();
+                .OrderByDescending(p => p.CreationDate);
+
+            PopulatePostStatuses(posts);
 
             return posts;
         }
 
         public async Task<IEnumerable<Post>> GetPersonalFeed()
         {
-            UserAccount user = GetContextUser();
+            UserAccount contextUser = GetContextUser();
 
-            IEnumerable<Post> userPosts = user.Posts;
+            await _context.Entry(contextUser)
+                .Collection(u => u.Posts)
+                .LoadAsync();
+
+            var userPosts = contextUser.Posts.ToList();
 
             List<Post> followeePosts = await (
                 from fr in _context.FollowerTable.AsNoTracking()
-                where fr.FollowerId == user.ID
+                where fr.FollowerId == contextUser.ID
                 join p in _context.Posts
                 on fr.FolloweeId equals p.AuthorId
                 select p
@@ -62,7 +66,7 @@ namespace Bulliten.API.Services
 
             List<Post> reposted = await _context.UserReposts
                 .AsNoTracking()
-                .Where(ur => ur.UserId == user.ID)
+                .Where(ur => ur.UserId == contextUser.ID)
                 .Select(ur => ur.Post)
                 .ToListAsync();
 
@@ -72,6 +76,8 @@ namespace Bulliten.API.Services
                 .NoDuplicates()
                 .OrderByDescending(p => p.CreationDate);
 
+            PopulatePostStatuses(orderedPosts);
+
             return orderedPosts;
         }
 
@@ -79,7 +85,6 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                new List<string> { "LikedPosts" },
                 (post, user) =>
                 {
                     if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
@@ -95,12 +100,10 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                new List<string> { "LikedPosts" },
                 (post, user) =>
                 {
                     UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
                     bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
-
 
                     if (likeWasRemoved)
                         post.Likes--;
@@ -114,7 +117,6 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                new List<string> { "RePosts" },
                 (post, user) =>
                 {
                     if (user.RePosts.Any(ur => ur.PostId == post.ID))
@@ -130,7 +132,6 @@ namespace Bulliten.API.Services
         {
             await ActOnPost(
                 postId,
-                new List<string> { "RePosts" },
                 (post, user) =>
                 {
                     UserRepost userRepostToRemove = user.RePosts.SingleOrDefault(ur => ur.PostId == post.ID);
@@ -153,6 +154,30 @@ namespace Bulliten.API.Services
             await _context.SaveChangesAsync();
         }
 
+        private void PopulatePostStatuses(IEnumerable<Post> posts)
+        {
+            IEnumerable<Post> repostedByContextUser =
+                (from p in posts
+                 join ur in _context.UserReposts
+                 on p.ID equals ur.PostId
+                 select p).ToList();
+
+            IEnumerable<Post> likedByContextUser =
+                (from p in posts
+                 join ul in _context.UserLike
+                 on p.ID equals ul.PostId
+                 select p).ToList();
+
+            posts.AsParallel().ForAll(post =>
+            {
+                if (repostedByContextUser.Contains(post))
+                    post.RePostStatus = true;
+
+                if (likedByContextUser.Contains(post))
+                    post.LikeStatus = true;
+            });
+        }
+
         private UserAccount GetContextUser() =>
             (UserAccount)_httpContextAccessor.HttpContext.Items[JwtMiddleware.CONTEXT_USER];
 
@@ -160,12 +185,10 @@ namespace Bulliten.API.Services
         /// Applies the passed in function delegate parameter to a specific post
         /// </summary>
         /// <param name="postId">Id of the post to apply the function delegate to</param>
-        /// <param name="includeProps">Dependent properties to load from the database for the <see cref="UserAccount"/> object in the function delegate</param>
         /// <param name="action">The method applied to the post parameter</param>
         /// <returns></returns>
         private async Task ActOnPost(
             int postId,
-            IEnumerable<string> includeProps,
             Action<Post, UserAccount> action)
         {
             Post post = await _context.Posts.SingleOrDefaultAsync(p => p.ID == postId);
@@ -176,9 +199,6 @@ namespace Bulliten.API.Services
             UserAccount user = await _context
                 .UserAccounts
                 .SingleOrDefaultAsync(u => u.ID == GetContextUser().ID);
-
-            foreach (string propName in includeProps)
-                await _context.Entry(user).Collection(propName).LoadAsync();
 
             action(post, user);
 

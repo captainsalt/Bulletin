@@ -195,7 +195,7 @@ namespace Bulliten.API.Tests.Services
                     Post userPost = GenerateRandomPosts(1).First();
 
                     user.Posts.Add(userPost);
-                
+
                     context.UserLike.Add(new UserLike
                     {
                         User = user,

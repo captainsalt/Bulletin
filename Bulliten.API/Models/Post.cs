@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Bulliten.API.Models
@@ -17,12 +16,11 @@ namespace Bulliten.API.Models
 
         public UserAccount Author { get; set; }
 
+        [JsonIgnore]
+        public virtual ICollection<UserLike> LikedBy { get; set; } = new List<UserLike>();
 
         [JsonIgnore]
-        public ICollection<UserLike> LikedBy { get; set; } = new List<UserLike>();
-
-        [JsonIgnore]
-        public ICollection<UserRepost> RepostedBy { get; set; } = new List<UserRepost>();
+        public virtual ICollection<UserRepost> RepostedBy { get; set; } = new List<UserRepost>();
 
         /// <summary>
         /// True if post is reposted by the context user

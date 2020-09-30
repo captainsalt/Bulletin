@@ -11,15 +11,15 @@ namespace Bulliten.API.Models
         public string Password { get; set; }
 
         [JsonIgnore]
-        public ICollection<Post> Posts { get; set; } = new List<Post>();
+        public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
         [JsonIgnore]
-        public ICollection<FollowRecord> Followers { get; set; } = new List<FollowRecord>();
+        public virtual ICollection<FollowRecord> Followers { get; set; } = new List<FollowRecord>();
 
         [JsonIgnore]
-        public ICollection<UserRepost> RePosts { get; set; } = new List<UserRepost>();
+        public virtual ICollection<UserRepost> RePosts { get; set; } = new List<UserRepost>();
 
         [JsonIgnore]
-        public ICollection<UserLike> LikedPosts { get; set; } = new List<UserLike>();
+        public virtual ICollection<UserLike> LikedPosts { get; set; } = new List<UserLike>();
     }
 }
