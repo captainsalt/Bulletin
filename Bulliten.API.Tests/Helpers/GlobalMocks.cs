@@ -12,11 +12,6 @@ namespace Bulliten.API.Tests.Helpers
     {
         public GlobalMocks()
         {
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(m => m["Secret"]).Returns("SecretTestString");
-
-            Configuration = configMock.Object;
-
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             httpContextAccessorMock
                 .Setup(m => m.HttpContext)
@@ -37,8 +32,6 @@ namespace Bulliten.API.Tests.Helpers
         }
 
         public IHttpContextAccessor HttpContextAccessor { get; set; }
-
-        public IConfiguration Configuration { get; set; }
 
         public IAuthenticationService AuthenticationService { get; set; }
     }
