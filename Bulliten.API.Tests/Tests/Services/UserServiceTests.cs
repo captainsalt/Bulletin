@@ -32,6 +32,8 @@ namespace Bulliten.API.Tests.Services
             );
         }
 
+        public void Dispose() => _context.Dispose();
+
         #region CreateAccount
         [Fact]
         public async Task CreateAccount_Adds_UserToDababase()
@@ -363,7 +365,5 @@ namespace Bulliten.API.Tests.Services
             Assert.False(await _target.UserIsFollowing(user2.Username));
         }
         #endregion
-
-        public void Dispose() => _context.Dispose();
     }
 }

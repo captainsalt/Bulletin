@@ -11,7 +11,7 @@ using static Bulliten.API.Tests.Helpers.TestHelpers;
 
 namespace Bulliten.API.Tests.Services
 {
-    public class PostServiceTests
+    public class PostServiceTests : IDisposable
     {
         private readonly BullitenDBContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -26,6 +26,8 @@ namespace Bulliten.API.Tests.Services
 
             _target = new PostService(_context, _httpContextAccessor);
         }
+
+        public void Dispose() => _context.Dispose();
 
         #region GetPublicFeed
         [Fact]
