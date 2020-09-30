@@ -87,6 +87,10 @@ namespace Bulliten.API.Services
                 postId,
                 async (post, user) =>
                 {
+                    await _context.Entry(user)
+                        .Collection(u => u.LikedPosts)
+                        .LoadAsync();
+
                     if (user.LikedPosts.Any(ul => ul.PostId == post.ID))
                         throw new ArgumentException("Cannot like a post you already liked");
 
@@ -130,6 +134,10 @@ namespace Bulliten.API.Services
                 postId,
                 async (post, user) =>
                 {
+                    await _context.Entry(user)
+                        .Collection(u => u.RePosts)
+                        .LoadAsync();
+
                     if (user.RePosts.Any(ur => ur.PostId == post.ID))
                         throw new ArgumentException("Cannot repost a post you already reposted");
 
