@@ -23,16 +23,20 @@ namespace Bulliten.API.Services
 
         public async Task<IEnumerable<Post>> GetPublicFeed(string username)
         {
-            UserAccount user = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
+            UserAccount contextUser = await _context.UserAccounts.SingleOrDefaultAsync(u => u.Username == username);
 
-            if (user == null)
+            if (contextUser == null)
                 throw new ArgumentException("User does not exist");
 
-            IEnumerable<Post> userPosts = user.Posts.ToList();
+            await _context.Entry(contextUser)
+                .Collection(u => u.Posts)
+                .LoadAsync();
+
+            IEnumerable<Post> userPosts = contextUser.Posts.ToList();
 
             List<Post> reposted = await _context.UserReposts
                 .AsNoTracking()
-                .Where(ur => ur.UserId == user.ID)
+                .Where(ur => ur.UserId == contextUser.ID)
                 .Select(ur => ur.Post)
                 .ToListAsync();
 
