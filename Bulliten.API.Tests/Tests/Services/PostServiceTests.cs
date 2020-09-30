@@ -156,6 +156,62 @@ namespace Bulliten.API.Tests.Services
 
             Assert.Single(feed);
         }
+
+        [Fact]
+        public async Task GetPersonalFeed_Returns_RepostStatus()
+        {
+            _context.AddUsers(2)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+
+                    context.UserReposts.Add(new UserRepost
+                    {
+                        User = user,
+                        Post = userPost
+                    });
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            IEnumerable<Post> feed = await _target.GetPersonalFeed();
+            bool repostStatus = feed.Single().RePostStatus;
+
+            Assert.True(repostStatus);
+        }
+
+        [Fact]
+        public async Task GetPersonalFeed_Returns_LikeStatus()
+        {
+            _context.AddUsers(2)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+                
+                    context.UserLike.Add(new UserLike
+                    {
+                        User = user,
+                        Post = userPost
+                    });
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            IEnumerable<Post> feed = await _target.GetPersonalFeed();
+            bool likeStatus = feed.Single().LikeStatus;
+
+            Assert.True(likeStatus);
+        }
         #endregion
 
         #region LikePost
@@ -166,9 +222,9 @@ namespace Bulliten.API.Tests.Services
                 .Setup(context =>
                 {
                     UserAccount user = _context.GetUserById(1);
-                    Post user1Post = GenerateRandomPosts(1).First();
+                    Post userPost = GenerateRandomPosts(1).First();
 
-                    user.Posts.Add(user1Post);
+                    user.Posts.Add(userPost);
                 });
 
             UserAccount contextUser = _context.GetUserById(1);
@@ -207,6 +263,29 @@ namespace Bulliten.API.Tests.Services
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.LikePost(1)
             );
+        }
+
+        [Fact]
+        public async Task LikePost_Adds_OneToLikeCount()
+        {
+            _context.AddUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    user.Posts.Add(userPost);
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await _target.LikePost(1);
+
+            Post likedPost = _context.UserLike.Single().Post;
+
+            Assert.Equal(1, likedPost.Likes);
         }
         #endregion
 
@@ -259,6 +338,38 @@ namespace Bulliten.API.Tests.Services
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _target.RemoveLike(1)
             );
+        }
+
+        [Theory]
+        [InlineData(0, 1)]
+        public async Task RemoveLike_Removes_OneFromLikeCount(int expected, int initial)
+        {
+            _context.AddUsers(1)
+                .Setup(context =>
+                {
+                    UserAccount user = _context.GetUserById(1);
+                    Post userPost = GenerateRandomPosts(1).First();
+
+                    userPost.Likes = initial;
+
+                    user.Posts.Add(userPost);
+
+                    context.UserLike.Add(new UserLike
+                    {
+                        User = user,
+                        Post = userPost
+                    });
+                });
+
+            UserAccount contextUser = _context.GetUserById(1);
+
+            _httpContextAccessor.SetContextUser(contextUser);
+
+            await _target.RemoveLike(1);
+
+            Post unlikedPost = _context.Posts.First();
+
+            Assert.Equal(expected, unlikedPost.Likes);
         }
         #endregion
 
