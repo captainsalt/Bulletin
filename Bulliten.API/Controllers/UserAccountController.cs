@@ -115,9 +115,6 @@ namespace Bulliten.API.Controllers
             }
         }
 
-        private UserAccount GetAccountFromContext() =>
-            (UserAccount)HttpContext.Items[JwtMiddleware.CONTEXT_USER];
-
         private IActionResult HandleException(Exception ex)
         {
             if (ex is ArgumentException argEx)
