@@ -112,7 +112,7 @@ namespace Bulliten.API.Services
                         .Collection(u => u.LikedPosts)
                         .LoadAsync();
 
-                    UserLike userLikeToRemove = user.LikedPosts.SingleOrDefault(ul => ul.PostId == post.ID);
+                    UserLike userLikeToRemove = await _context.UserLike.FindAsync(postId, user.ID);
                     bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
 
                     if (likeWasRemoved)
@@ -159,7 +159,7 @@ namespace Bulliten.API.Services
                         .Collection(u => u.RePosts)
                         .LoadAsync();
 
-                    UserRepost userRepostToRemove = user.RePosts.SingleOrDefault(ur => ur.PostId == post.ID);
+                    UserRepost userRepostToRemove = await _context.UserReposts.FindAsync(postId, user.ID);
                     bool repostWasRemoved = user.RePosts.Remove(userRepostToRemove);
 
                     if (repostWasRemoved)
@@ -175,7 +175,7 @@ namespace Bulliten.API.Services
 
         public async Task CreatePost(Post formPost)
         {
-            UserAccount dbUser = _context.UserAccounts.Find(GetContextUser().ID);
+            UserAccount dbUser = await _context.UserAccounts.FindAsync(GetContextUser().ID);
 
             dbUser.Posts.Add(formPost);
 
