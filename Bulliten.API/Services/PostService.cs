@@ -116,7 +116,9 @@ namespace Bulliten.API.Services
                         .Collection(u => u.LikedPosts)
                         .LoadAsync();
 
-                    UserLike userLikeToRemove = await _context.UserLike.FindAsync(postId, user.ID);
+                    UserLike userLikeToRemove = await _context.UserLike
+                        .SingleAsync(ul => ul.PostId == postId && ul.UserId == user.ID);
+
                     bool likeWasRemoved = user.LikedPosts.Remove(userLikeToRemove);
 
                     if (likeWasRemoved)
@@ -163,7 +165,9 @@ namespace Bulliten.API.Services
                         .Collection(u => u.RePosts)
                         .LoadAsync();
 
-                    UserRepost userRepostToRemove = await _context.UserReposts.FindAsync(postId, user.ID);
+                    UserRepost userRepostToRemove = await _context.UserReposts
+                        .SingleAsync(ur => ur.PostId == postId && ur.UserId == user.ID);
+
                     bool repostWasRemoved = user.RePosts.Remove(userRepostToRemove);
 
                     if (repostWasRemoved)
@@ -172,7 +176,9 @@ namespace Bulliten.API.Services
                         post.RePosts = repostCount - 1;
                     }
                     else
+                    {
                         throw new ArgumentException("Cannot unrepost a post you did not repost");
+                    }
                 }
             );
         }
