@@ -1,39 +1,41 @@
 <template>
-  <v-card class="card" outlined>
-    <v-form>
-      <v-alert v-if="errorMsg" type="error">
-        {{ errorMsg }}
-      </v-alert>
+  <FormShell>
+    <v-alert v-if="errorMsg" type="error">
+      {{ errorMsg }}
+    </v-alert>
 
-      <v-text-field
-        v-model="username"
-        label="Username"
-        required
-      />
+    <v-text-field
+      v-model="username"
+      label="Username"
+      required
+    />
 
-      <v-text-field
-        v-model="password"
-        type="password"
-        label="Password"
-        required
-      />
+    <v-text-field
+      v-model="password"
+      type="password"
+      label="Password"
+      required
+    />
 
-      <v-btn
-        color="primary"
-        block
-        @click="submit"
-      >
-        Submit
-      </v-btn>
-    </v-form>
-  </v-card>
+    <v-btn
+      color="primary"
+      block
+      @click="submit"
+    >
+      Register
+    </v-btn>
+  </FormShell>
 </template>
 
 <script>
 import Vue from "vue";
+import FormShell from "@/components/FormShell.vue";
 import { mapActions } from "vuex";
 
 export default Vue.extend({
+  components: {
+    FormShell
+  },
   data: () => ({
     username: "",
     password: "",
@@ -58,7 +60,7 @@ export default Vue.extend({
 
 <style scoped>
 .card {
-  width: 50% ;
+  width: 50%;
   padding: 10px;
 }
 </style>
