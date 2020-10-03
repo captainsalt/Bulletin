@@ -19,33 +19,17 @@
 
     <v-card-actions>
       <v-btn
-        v-show="isRePosted"
         text
-        @click="unrepost"
+        @click="isRePosted ? unrepost() : repost()"
       >
-        Un Re-Post
-      </v-btn>
-      <v-btn
-        v-show="!isRePosted"
-        text
-        @click="repost"
-      >
-        Re-Post
+        {{ isRePosted ? "Unrepost" : "Repost" }}
       </v-btn>
 
       <v-btn
-        v-show="isLiked"
         text
-        @click="unlike"
+        @click="isLiked ? unlike() : like()"
       >
-        Un-Like
-      </v-btn>
-      <v-btn
-        v-show="!isLiked"
-        text
-        @click="like"
-      >
-        Like
+        {{ isLiked ? "Unlike" : "Like" }}
       </v-btn>
     </v-card-actions>
 
