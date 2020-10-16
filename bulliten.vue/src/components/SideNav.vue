@@ -5,6 +5,16 @@
       permanent
     >
       <v-list>
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title class="title">
+              Hello, {{ user.username }}
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider/>
+
         <v-list-item
           v-for="item in items"
           :key="item.title"
@@ -49,8 +59,7 @@ export default Vue.extend({
     items() {
       return [
         { title: "Dashboard", icon: "mdi-view-dashboard", path: "/dashboard" },
-        { title: "Profile", icon: "mdi-account", path: `/profile/${this.user.username}` },
-        { title: "About", icon: "mdi-help-box", path: "/about" }
+        { title: "Profile", icon: "mdi-account", path: `/profile/${this.user.username}` }
       ];
     }
   },
