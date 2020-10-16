@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+    frontend:
+        build: src/bulliten.vue
+        restart: always
+        ports:
+            - 3000:80
+        depends_on:
+            - backend
+            - db
+
+    backend:
+        build: "src/Bulliten.API"
+        restart: always
+        ports:
+            - 3001:80
+        depends_on:
+            - db
+
+    db:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: root

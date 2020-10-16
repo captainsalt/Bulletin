@@ -97,7 +97,7 @@ export async function getUserProfile(username: string): Promise<UserProfile> {
   if (!response.ok)
     throw await getError(response);
 
-  return await response.json();
+  return response.json();
 }
 
 export async function followUser(username: string): Promise<void> {
