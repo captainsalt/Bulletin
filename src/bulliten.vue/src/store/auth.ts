@@ -2,7 +2,6 @@
 import { SET_TOKEN, SET_USER } from "./mutations";
 import { ActionContext } from "vuex";
 import * as api from "@/services/api-interface";
-import Router from "@/router/index";
 import router from "@/router/index";
 
 export default {
