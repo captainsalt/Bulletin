@@ -64,8 +64,11 @@ export default Vue.extend({
     }
   },
   methods: {
-    navigate(path: string) {
-      this.$router.push(path);
+    async navigate(path: string) {
+      if (path === this.$route.path)
+        return;
+
+      await this.$router.push(path);
     }
   }
 });
