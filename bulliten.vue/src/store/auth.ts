@@ -2,6 +2,8 @@
 import { SET_TOKEN, SET_USER } from "./mutations";
 import { ActionContext } from "vuex";
 import * as api from "@/services/api-interface";
+import Router from "@/router/index";
+import router from "@/router/index";
 
 export default {
   namespaced: true,
@@ -35,6 +37,15 @@ export default {
       try {
         const { token, user } = await api.createAccount(username, password);
         await dispatch("storeAuth", { token, user });
+      }
+      catch (error) {
+        throw error;
+      }
+    },
+    async logout({ dispatch }: ActionContext<any, any>) {
+      try {
+        await dispatch("storeAuth", { token: null, user: null });
+        await router.push("/login");
       }
       catch (error) {
         throw error;

@@ -38,6 +38,7 @@
             color="error"
             outlined
             block
+            @click="logout"
           >
             Logout
           </v-btn>
@@ -49,7 +50,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 export default Vue.extend({
   computed: {
@@ -64,6 +65,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions("auth", [
+      "logout"
+    ]),
     async navigate(path: string) {
       if (path === this.$route.path)
         return;
