@@ -15,7 +15,9 @@
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title @click="navigate(item.path)">
+              {{ item.title }}
+            </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -37,15 +39,25 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapState } from "vuex";
 
 export default Vue.extend({
-  data: () => ({
-    items: [
-      { title: "Dashboard", icon: "mdi-view-dashboard" },
-      { title: "Profile", icon: "mdi-account" },
-      { title: "About", icon: "mdi-help-box" }
-    ],
-    right: null
-  })
+  computed: {
+    ...mapState("auth", [
+      "user"
+    ]),
+    items() {
+      return [
+        { title: "Dashboard", icon: "mdi-view-dashboard", path: "/dashboard" },
+        { title: "Profile", icon: "mdi-account", path: `/profile/${this.user.username}` },
+        { title: "About", icon: "mdi-help-box", path: "/about" }
+      ];
+    }
+  },
+  methods: {
+    navigate(path: string) {
+      this.$router.push(path);
+    }
+  }
 });
 </script>
