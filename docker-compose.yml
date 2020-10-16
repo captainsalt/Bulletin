@@ -7,10 +7,10 @@ services:
         ports:
             - 8080:80
         depends_on:
-            - api
+            - backend
             - db
 
-    api:
+    backend:
         build: "src/Bulliten.API"
         restart: always
         ports:
