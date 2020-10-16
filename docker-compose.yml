@@ -11,7 +11,7 @@ services:
             - db
 
     backend:
-        build: "src/Bulliten.API"
+        build: src/Bulliten.API
         restart: always
         ports:
             - 3001:80
