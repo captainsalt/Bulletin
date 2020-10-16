@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <SideNavLayout>
     <v-container fluid>
       <v-alert v-if="errorMsg" type="error">
         {{ errorMsg }}
@@ -25,7 +25,7 @@
     <v-container>
       <BullitenBoard :posts="posts"/>
     </v-container>
-  </div>
+  </SideNavLayout>
 </template>
 
 <script lang="ts">
