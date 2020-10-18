@@ -151,6 +151,7 @@ namespace Bulliten.API.Services
 
         public async Task<bool> UserIsFollowing(string followeeUsername)
         {
+            await _context.FollowerTable.LoadAsync();
             UserAccount followee = await _context.UserAccounts.FirstOrDefaultAsync(u => u.Username == followeeUsername);
             return followee.Followers.Any(u => u.FollowerId == GetContextUser().ID);
         }

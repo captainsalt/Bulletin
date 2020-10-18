@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Bulliten.API.Services
@@ -60,18 +61,22 @@ namespace Bulliten.API.Services
 
             var userPosts = contextUser.Posts.ToList();
 
-            List<Post> followeePosts = await (
-                from fr in _context.FollowerTable.AsNoTracking()
-                where fr.FollowerId == contextUser.ID
-                join p in _context.Posts
-                on fr.FolloweeId equals p.AuthorId
-                select p
-            ).ToListAsync();
+            List<Post> followeePosts = await
+                (from fr in _context.FollowerTable.AsNoTracking()
+                 where fr.FollowerId == contextUser.ID
+                 join p in _context.Posts.AsNoTracking()
+                 on fr.FolloweeId equals p.AuthorId
+                 select p)
+                .Include(p => p.Author)
+                .ToListAsync();
 
-            List<Post> reposted = await _context.UserReposts
-                .AsNoTracking()
-                .Where(ur => ur.UserId == contextUser.ID)
-                .Select(ur => ur.Post)
+            List<Post> reposted = await
+                (from ur in _context.UserReposts.AsNoTracking()
+                 where ur.UserId == contextUser.ID
+                 join p in _context.Posts.AsNoTracking()
+                 on ur.PostId equals p.ID
+                 select p)
+                .Include(p => p.Author)
                 .ToListAsync();
 
             IEnumerable<Post> orderedPosts = userPosts
@@ -198,13 +203,15 @@ namespace Bulliten.API.Services
                 (from p in posts
                  join ur in _context.UserReposts
                  on p.ID equals ur.PostId
-                 select p).ToList();
+                 select p)
+                 .ToList();
 
             IEnumerable<Post> likedByContextUser =
                 (from p in posts
                  join ul in _context.UserLike
                  on p.ID equals ul.PostId
-                 select p).ToList();
+                 select p)
+                 .ToList();
 
             posts.AsParallel().ForAll(post =>
             {
