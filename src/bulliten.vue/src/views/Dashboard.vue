@@ -1,26 +1,30 @@
 <template>
   <SideNavLayout>
-    <BullitenBoard :posts="posts"/>
+    <v-row no-gutters>
+      <v-col>
+        <BullitenBoard :posts="posts"/>
+      </v-col>
 
-    <v-btn
-      v-resize="setButtonPos"
-      class="create"
-      color="secondary"
-    >
-      Create Post
-    </v-btn>
+      <v-col cols="3">
+        <div id="create-container">
+          <CreatePostForm/>
+        </div>
+      </v-col>
+    </v-row>
   </SideNavLayout>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import BullitenBoard from "@/components/BullitenBoard.vue";
+import CreatePostForm from "@/components/CreatePostForm.vue";
 import * as api from "@/services/api-interface";
 import { mapState } from "vuex";
 
 export default Vue.extend({
   components: {
-    BullitenBoard
+    BullitenBoard,
+    CreatePostForm
   },
   data: () => ({
     posts: [] as Post[]
@@ -32,23 +36,29 @@ export default Vue.extend({
   },
   async beforeMount() {
     this.posts = await api.getPersonalFeed();
-  },
-  methods: {
-    setButtonPos() {
-      const createButton = this.$el.querySelector(".create") as HTMLElement;
-      const buttonHeight = createButton.offsetHeight;
-
-      createButton.style.top = `calc(100vh - ${buttonHeight}px - 12px)`;
-      return buttonHeight;
-    }
   }
 });
 </script>
 
 <style scoped>
-.create {
-  right: 12px;
-  position: fixed;
-  z-index: 1;
+#dash-grid {
+  display: grid;
+  grid-template:
+    "posts" 1fr
+    "form" auto / 100%;
+  height: 100%;
+}
+
+#create-container {
+  height: calc(100vh - 24px);
+  position: sticky;
+  display: flex;
+  justify-content: baseline;
+  top: 12px;
+}
+
+#create-container > * {
+  position: absolute;
+  bottom: 0;
 }
 </style>
