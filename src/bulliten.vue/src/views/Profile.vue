@@ -11,9 +11,9 @@
         <v-card-actions v-if="!isOwnProfile">
           <v-btn
             text
-            @click="() => { profile.isFollowed ? unfollow() : follow() }"
+            @click="() => { profile.isFollowing ? unfollow() : follow() }"
           >
-            {{ profile.isFollowed ? "Unfollow" : "Follow" }}
+            {{ profile.isFollowing ? "Unfollow" : "Follow" }}
           </v-btn>
         </v-card-actions>
 
@@ -73,7 +73,7 @@ export default Vue.extend({
     async follow() {
       try {
         await api.followUser(this.profile.user.username);
-        this.profile.isFollowed = true;
+        this.profile.isFollowing = true;
         this.profile.followerCount++;
       }
       catch (error) {
@@ -83,7 +83,7 @@ export default Vue.extend({
     async unfollow() {
       try {
         await api.unfollowUser(this.profile.user.username);
-        this.profile.isFollowed = false;
+        this.profile.isFollowing = false;
         this.profile.followerCount--;
       }
       catch (error) {

@@ -19,7 +19,7 @@ declare interface UserProfile {
   user: UserAccount;
   followerCount: number;
   followingCount: number;
-  isFollowed: boolean;
+  isFollowing: boolean;
 }
 
 declare interface AuthResponse {
