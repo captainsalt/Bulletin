@@ -2,15 +2,21 @@
   <SideNavLayout>
     <v-container>
       <v-card
-        class="mx-auto">
-        <v-list-item
-          v-for="u in users"
+        class="mx-auto"
+      >
+        <div
+          v-for="(u, index) in users"
           :key="u.id"
-          @click="toProfile(u.username)">
-          <v-list-item-content>
-            <v-list-item-title>{{ u.username }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          @click="toProfile(u.username)"
+        >
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title>{{ u.username }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-divider v-if="index < users.length - 1"/>
+        </div>
       </v-card>
     </v-container>
   </SideNavLayout>
