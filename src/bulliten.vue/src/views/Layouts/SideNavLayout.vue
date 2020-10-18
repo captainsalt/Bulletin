@@ -1,7 +1,7 @@
 <template>
   <v-container fill-height fluid>
     <v-row no-gutters>
-      <v-col sm="3">
+      <v-col cols="auto">
         <div class="flex sticky">
           <SideNav class="sticky"/>
         </div>
