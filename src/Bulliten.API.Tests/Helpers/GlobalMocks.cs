@@ -2,7 +2,6 @@
 using Bulliten.API.Models.Authentication;
 using Bulliten.API.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Threading.Tasks;
 
