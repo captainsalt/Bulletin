@@ -61,7 +61,8 @@ export default Vue.extend({
     items() {
       return [
         { title: "Dashboard", icon: "mdi-view-dashboard", path: "/dashboard" },
-        { title: "Profile", icon: "mdi-account", path: `/profile/${this.user.username}` }
+        { title: "Profile", icon: "mdi-account", path: `/profile/${this.user.username}` },
+        { title: "Users", icon: "mdi-account-group", path: "/users" }
       ];
     }
   },

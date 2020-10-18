@@ -24,6 +24,17 @@ async function getError(response: Response): Promise<Error> {
   return new Error((await response.json()).message);
 }
 
+export async function getUsers(): Promise<UserAccount[]> {
+  const response = await fetchRequest("GET", "/user/all", {
+    headers: getAuthHeader()
+  });
+
+  if (!response.ok)
+    throw await getError(response);
+
+  return response.json();
+}
+
 export async function createAccount(username: string, password: string): Promise<AuthResponse> {
   const form = new FormData();
   form.append("username", username);

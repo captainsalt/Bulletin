@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Dashboard from "../views/Dashboard.vue";
 import Profile from "../views/Profile.vue";
+import Users from "../views/Users.vue";
 import store from "@/store/index";
 
 Vue.use(VueRouter);
@@ -42,6 +43,11 @@ const routes: RouteConfig[] = [
     name: "profile",
     component: Profile,
     props: true,
+    meta: { requiresAuth: true }
+  }, {
+    path: "/users",
+    name: "users",
+    component: Users,
     meta: { requiresAuth: true }
   }
 ];
