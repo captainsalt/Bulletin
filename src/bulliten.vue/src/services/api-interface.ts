@@ -1,4 +1,5 @@
 import store from "@/store/index";
+import router from "@/router/index";
 
 const baseUrl: string = process.env.VUE_APP_API_URL;
 
@@ -19,8 +20,14 @@ async function fetchRequest<T>(method: string, route: string, options: RequestIn
     mode: "cors"
   });
 
-  if (!response.ok)
+  if (!response.ok) {
+    if (response.status === 401) {
+      router.push("/login");
+      store.dispatch("logout");
+    }
+
     throw new Error((await response.json()).message);
+  }
 
   return response.json();
 }
