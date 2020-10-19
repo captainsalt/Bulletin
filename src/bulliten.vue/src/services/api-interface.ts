@@ -12,27 +12,23 @@ function getAuthHeader(): Headers {
   return headers;
 }
 
-function fetchRequest(method: string, route: string, options: RequestInit) {
-  return fetch(`${baseUrl}${route}`, {
+async function fetchRequest<T>(method: string, route: string, options: RequestInit): Promise<T> {
+  const response = await fetch(`${baseUrl}${route}`, {
     ...options,
     method,
     mode: "cors"
   });
-}
 
-async function getError(response: Response): Promise<Error> {
-  return new Error((await response.json()).message);
+  if (!response.ok)
+    throw new Error((await response.json()).message);
+
+  return response.json();
 }
 
 export async function getUsers(): Promise<UserAccount[]> {
-  const response = await fetchRequest("GET", "/user/all", {
+  return fetchRequest("GET", "/user/all", {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
-
-  return response.json();
 }
 
 export async function createAccount(username: string, password: string): Promise<AuthResponse> {
@@ -40,14 +36,9 @@ export async function createAccount(username: string, password: string): Promise
   form.append("username", username);
   form.append("password", password);
 
-  const response = await fetchRequest("POST", "/user/create", {
+  return fetchRequest("POST", "/user/create", {
     body: form
   });
-
-  if (!response.ok)
-    throw await getError(response);
-
-  return response.json();
 }
 
 export async function login(username: string, password: string): Promise<AuthResponse> {
@@ -55,113 +46,72 @@ export async function login(username: string, password: string): Promise<AuthRes
   form.append("username", username);
   form.append("password", password);
 
-  const response = await fetchRequest("POST", "/user/login", {
+  return fetchRequest("POST", "/user/login", {
     body: form
   });
-
-  if (!response.ok)
-    throw await getError(response);
-
-  return response.json();
 }
 
 export async function createPost(content: string): Promise<void> {
   const form = new FormData();
   form.append("content", content);
 
-  const response = await fetchRequest("POST", "/post/create", {
+  return fetchRequest("POST", "/post/create", {
     body: form,
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
 }
 
 export async function getPublicFeed(username: string): Promise<Post[]> {
-  const response = await fetchRequest("GET", `/post/feed/public?username=${username}`, {
+  return fetchRequest("GET", `/post/feed/public?username=${username}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
-
-  return response.json();
 }
 
 export async function getPersonalFeed(): Promise<Post[]> {
-  const response = await fetchRequest("GET", "/post/feed/personal", {
+  return fetchRequest("GET", "/post/feed/personal", {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
-
-  return response.json();
 }
 
 export async function getUserProfile(username: string): Promise<UserProfile> {
-  const response = await fetchRequest("GET", `/user/profile?username=${username}`, {
+  return fetchRequest("GET", `/user/profile?username=${username}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
-
-  return response.json();
 }
 
 export async function followUser(username: string): Promise<void> {
-  const response = await fetchRequest("POST", `/user/follow?username=${username}`, {
+  await fetchRequest("POST", `/user/follow?username=${username}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
 }
 
 export async function unfollowUser(username: string): Promise<void> {
-  const response = await fetchRequest("DELETE", `/user/unfollow?username=${username}`, {
+  await fetchRequest("DELETE", `/user/unfollow?username=${username}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
 }
 
 export async function likePost(postId: number): Promise<void> {
-  const response = await fetchRequest("POST", `/post/like?postId=${postId}`, {
+  await fetchRequest("POST", `/post/like?postId=${postId}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
 }
 
 export async function unlikePost(postId: number): Promise<void> {
-  const response = await fetchRequest("DELETE", `/post/like/remove?postId=${postId}`, {
+  await fetchRequest("DELETE", `/post/like/remove?postId=${postId}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
 }
 
 export async function repost(postId: number): Promise<void> {
-  const response = await fetchRequest("POST", `/post/repost?postId=${postId}`, {
+  await fetchRequest("POST", `/post/repost?postId=${postId}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
 }
 
 export async function unRepost(postId: number): Promise<void> {
-  const response = await fetchRequest("DELETE", `/post/repost/remove?postId=${postId}`, {
+  await fetchRequest("DELETE", `/post/repost/remove?postId=${postId}`, {
     headers: getAuthHeader()
   });
-
-  if (!response.ok)
-    throw await getError(response);
 }
 
