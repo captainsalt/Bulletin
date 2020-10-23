@@ -1,3 +1,5 @@
+![API Tests](https://github.com/captainsalt/Bulliten/workflows/API%20Tests/badge.svg)
+
 # Bulliten
 A social media site based on another popular site
 
