@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bulletin.API", "Bulletin.API.csproj", "{F74ADA02-106B-4153-B7B5-E10B722230F9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bulletin.API.Tests", "..\Bulletin.API.Tests\Bulletin.API.Tests.csproj", "{DE236BA2-45F0-424F-97C7-154941F70E6D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F74ADA02-106B-4153-B7B5-E10B722230F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F74ADA02-106B-4153-B7B5-E10B722230F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F74ADA02-106B-4153-B7B5-E10B722230F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F74ADA02-106B-4153-B7B5-E10B722230F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE236BA2-45F0-424F-97C7-154941F70E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE236BA2-45F0-424F-97C7-154941F70E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE236BA2-45F0-424F-97C7-154941F70E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE236BA2-45F0-424F-97C7-154941F70E6D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A64BC47E-5BA7-4115-97B9-5572EE6F5A0A}
+	EndGlobalSection
+EndGlobal
