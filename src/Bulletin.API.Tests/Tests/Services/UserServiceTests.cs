@@ -92,10 +92,8 @@ namespace Bulletin.API.Tests.Services
                 context.UserAccounts.Add(testAccount);
             });
 
-            testAccount.Password = "WrongPassword";
-
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _target.Login(testAccount)
+                _target.Login(new UserAccount { Username = testAccount.Username, Password = "WrongPassword" })
             );
         }
 

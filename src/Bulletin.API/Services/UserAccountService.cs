@@ -33,7 +33,10 @@ namespace Bulletin.API.Services
             if (isInvalidUsername)
                 throw new ArgumentException($"Username \"{formAccount.Username}\" is already in use");
 
-            await _context.UserAccounts.AddAsync(formAccount);
+            var dbUserAccount = new UserAccount() { Username = formAccount.Username, Password = formAccount.Password };
+            dbUserAccount.Password = await _authService.HashPassword(dbUserAccount.Password);
+
+            await _context.UserAccounts.AddAsync(dbUserAccount);
             await _context.SaveChangesAsync();
 
             return await _authService
@@ -47,16 +50,18 @@ namespace Bulletin.API.Services
         public async Task<AuthenticationResponse> Login(UserAccount formAccount)
         {
             UserAccount matchedAccount = await _context.UserAccounts
-                .SingleOrDefaultAsync(u => u.Username == formAccount.Username && u.Password == formAccount.Password);
+                .SingleOrDefaultAsync(u => u.Username == formAccount.Username);
 
-            if (matchedAccount == null)
+            bool isCorrectPassword = await _authService.CheckPassword(matchedAccount, formAccount.Password);
+
+            if (matchedAccount == null || isCorrectPassword == false)
                 throw new ArgumentException("Invalid username or password");
 
             return await _authService
                 .Authenticate(new AuthenticationRequest
                 {
-                    Username = matchedAccount.Username,
-                    Password = matchedAccount.Password
+                    Username = formAccount.Username,
+                    Password = formAccount.Password
                 });
         }
 

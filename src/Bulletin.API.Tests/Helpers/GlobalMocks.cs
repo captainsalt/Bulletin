@@ -27,6 +27,20 @@ namespace Bulletin.API.Tests.Helpers
                     return Task.FromResult(new AuthenticationResponse(userAccount, token: string.Empty));
                 });
 
+            authServiceMock
+                .Setup(m => m.CheckPassword(It.IsAny<UserAccount>(), It.IsAny<string>()))
+                .Returns<UserAccount, string>((account, password) =>
+                {
+                    if (account?.Password == password)
+                        return Task.FromResult(true);
+                    else
+                        return Task.FromResult(false);
+                });
+
+            authServiceMock
+                .Setup(m => m.HashPassword(It.IsAny<string>()))
+                .Returns<string>(password => Task.FromResult(password));
+
             AuthenticationService = authServiceMock.Object;
         }
 
